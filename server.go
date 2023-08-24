@@ -14,9 +14,9 @@ import (
 // pulling, querying, etc, etc, etc
 // then link that to this
 
+
 // also implement a tinyURL server so that
 // links can live on the server here instead of elsewhere
-
 func smsHandler(context *gin.Context) {
     body, err := io.ReadAll(context.Request.Body)
     if err != nil {
@@ -30,8 +30,11 @@ func smsHandler(context *gin.Context) {
         context.Abort()
         return
     }
-
+    
     fmt.Println(reqParams["Body"])
+    for k := range reqParms {
+        fmt.Println(k)
+    }
 
     message := &twiml.MessagingMessage {
         Body: "Let the chaos begin",
