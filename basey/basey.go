@@ -10,7 +10,7 @@ const (
     host = "localhost"
     port = 5432
     user = "mehuljoshi"
-    password = "46AGMDJS"
+    password = ""
     dbname = "recipies"
 )
 
