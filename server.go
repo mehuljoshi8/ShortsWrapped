@@ -12,8 +12,10 @@ import (
 // TODO: Complete database work
 // users, links, etc, etc tables
 // pulling, querying, etc, etc, etc
-
 // then link that to this
+
+// also implement a tinyURL server so that
+// links can live on the server here instead of elsewhere
 
 func smsHandler(context *gin.Context) {
     body, err := io.ReadAll(context.Request.Body)
@@ -27,10 +29,6 @@ func smsHandler(context *gin.Context) {
     if err != nil {
         context.Abort()
         return
-    }
-
-    for k := range reqParams {
-        fmt.Println(k)
     }
 
     fmt.Println(reqParams["Body"])
