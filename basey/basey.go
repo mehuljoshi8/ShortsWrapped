@@ -4,14 +4,17 @@ import (
     "fmt"
     "database/sql"
     _ "github.com/lib/pq"
+    "os"
 )
+
 const (
     host = "localhost"
     port = 5432
     user = "postgres"
-    password = "46AGMDJS"
     dbname = "recipes"
 )
+
+var password = os.Getenv("PSQL_PW")
 
 /*
 CREATE TABLE USERS (
