@@ -34,6 +34,15 @@ func smsHandler(context *gin.Context) {
     
     fmt.Println(reqParams["Body"])
     fmt.Println(reqParams["From"])
+    id := basey.LookupUserId(db, reqParams["From"][0])
+    fmt.Println(id)
+    if id == -1 {
+        basey.InsertUser(db, reqParams["From"][0])
+        id = basey.LookupUserId(db, reqParams["From"][0])
+    }
+
+    basey.InsertLink(db, id, reqParams["Body"][0])
+
 
     message := &twiml.MessagingMessage {
         Body: "Let the chaos begin",
@@ -51,7 +60,6 @@ func smsHandler(context *gin.Context) {
 func main() {
     db = basey.OpenDatabase()
     defer db.Close()
-    //basey.FindUser(db, "+14259431672")
     router := gin.Default()
     router.POST("/sms", smsHandler)
     router.Run(":4040")

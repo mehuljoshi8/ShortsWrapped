@@ -6,18 +6,31 @@ import (
     _ "github.com/lib/pq"
 )
 const (
-    host = "local"
+    host = "localhost"
     port = 5432
-    user = "mehuljoshi"
+    user = "postgres"
     password = "46AGMDJS"
-    dbname = "recipies"
+    dbname = "recipes"
 )
 
+/*
+CREATE TABLE USERS (
+    id SERIAL PRIMARY KEY,
+    number varchar(12) UNIQUE NON NULL
+);
+*/
 type User struct {
     id          uint64
     number      string
 }
 
+/*
+CREATE TABLE LINKS (
+    id SERIAL PRIMARY KEY,
+    hyperlink varchar NON NULL,
+    user_id INTEGER REFERENCES users (id)
+);
+*/
 type Link struct {
     id          uint64
     userid      uint64
@@ -29,15 +42,8 @@ func OpenDatabase() *sql.DB {
     db, err := sql.Open("postgres", psqlconn)
     checkError(err)
     fmt.Println("Connected Successfully to basey :)")
-
-
-    s := "+14259431672"
-    var id uint64
-    err = db.QueryRow("SELECT FROM USERS WHERE number=?", s).Scan(&id)
-    checkError(err)
-    fmt.Print("id = ")
-    fmt.Println(id)
-
+    //FindUser(db, "+14259431674")
+    //InsertLink(db, 1, "https://www.instagram.com/reel/Cv49nyaLZpx/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA==")
     return db
 }
 
@@ -50,22 +56,9 @@ func InsertUser(db *sql.DB, number string) {
 
 // insert links into the db
 func InsertLink(db *sql.DB, userId int, link string) {
-    insertSQL := `INSERT INTO "links"("userid", "hyperlink") values($1, $2)`
+    insertSQL := `INSERT INTO "links"("user_id", "hyperlink") values($1, $2)`
     _, e := db.Exec(insertSQL, userId, link)
     checkError(e)
-}
-
-func LookupUser(number string) {
-    //var id uint64
-    //err := db.QueryRow("SELECT FROM USERS WHERE number = ?", number).Scan(&id)
-    //if err != nil {
-    //    if err == sql.ErrNoRows {
-    //        fmt.Println("This number is not in the database")
-    //    }
-    //    checkError(err)
-    //}
-    //fmt.Println(id)
-    fmt.Println(number)
 }
 
 func checkError(err error) {
@@ -74,11 +67,19 @@ func checkError(err error) {
     }
 }
 
-func FindUser(db *sql.DB, s string) {
+// Returns the id for a number in the users database
+func LookupUserId(db *sql.DB, s string) int {
     fmt.Println(s)
-    var id uint64
-    err := db.QueryRow("SELECT FROM USERS WHERE number=?", s).Scan(&id)
-    checkError(err)
+    var id int
+    err := db.QueryRow("SELECT id FROM USERS WHERE number like $1", s).Scan(&id)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            fmt.Println("NO ROWS FOUND")
+            return -1;
+        }
+        panic(err)
+    }
     fmt.Print("id = ")
     fmt.Println(id)
+    return id
 }
