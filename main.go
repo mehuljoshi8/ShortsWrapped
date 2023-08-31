@@ -2,19 +2,30 @@ package main
 
 import (
     "recipeBot/basey"
-    "fmt"
     "net/http"
     "io"
     "github.com/gin-gonic/gin"
     "github.com/twilio/twilio-go/twiml"
     "net/url"
     "database/sql"
+    
 )
 
-// TODO: Move handler to server.go file
-// Implement Server struct that is incharge of managing the db.
-
 var db *sql.DB
+
+func isInstaReelLink(s string) bool {
+    const instaReelStarter = "https://www.instagram.com/reel/"
+    if len(s) < len(instaReelStarter) {
+        return false
+    }
+
+    for i := 0; i < len(instaReelStarter); i++ {
+        if instaReelStarter[i] != s[i] {
+            return false
+        }
+    }
+    return true
+}
 
 // TODO: implement a tiny URL server
 // where we can shorten links and store them.
@@ -32,17 +43,17 @@ func smsHandler(context *gin.Context) {
         return
     }
     
-    fmt.Println(reqParams["Body"])
-    fmt.Println(reqParams["From"])
-    id := basey.LookupUserId(db, reqParams["From"][0])
-    fmt.Println(id)
+    input := reqParams["Body"][0]
+    userNumber := reqParams["From"][0]
+    id := basey.LookupUserId(db, userNumber)
     if id == -1 {
-        basey.InsertUser(db, reqParams["From"][0])
-        id = basey.LookupUserId(db, reqParams["From"][0])
+        basey.InsertUser(db, userNumber)
+        id = basey.LookupUserId(db, userNumber)
     }
 
-    basey.InsertLink(db, id, reqParams["Body"][0])
-
+    if isInstaReelLink(input) {
+        basey.InsertLink(db, id, input)
+    }
 
     message := &twiml.MessagingMessage {
         Body: "Let the chaos begin",

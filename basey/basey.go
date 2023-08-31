@@ -86,3 +86,8 @@ func LookupUserId(db *sql.DB, s string) int {
     fmt.Println(id)
     return id
 }
+
+
+// TODO: Write a function that returns an array of links for a user
+// SELECT hyperlink from LINKS WHERE userid = usierid -> to array
+// give all the links
