@@ -12,7 +12,8 @@ import (
 )
 
 var db *sql.DB
-
+// to select instareel caption
+// see document.querySelector("._a9zs");
 func isInstaReelLink(s string) bool {
     const instaReelStarter = "https://www.instagram.com/reel/"
     if len(s) < len(instaReelStarter) {
