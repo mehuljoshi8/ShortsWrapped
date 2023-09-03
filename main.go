@@ -8,6 +8,7 @@ import (
     "github.com/twilio/twilio-go/twiml"
     "net/url"
     "database/sql"
+    "fmt"
 )
 
 var db *sql.DB
@@ -48,18 +49,41 @@ func getRequestParameters(context *gin.Context) url.Values {
     return requestParams
 }
 
-
+// returns a string result that is outputted to the user
+// based on an interaction by the input.
 func routeInput(input string, userNumber string) string {
-    id := basey.LookupUserId(db, userNumber)
-    if id == -1 {
+    userid := basey.LookupUserId(db, userNumber)
+    if userid == -1 {
         basey.InsertUser(db, userNumber)
-        id = basey.LookupUserId(db, userNumber)
+        userid = basey.LookupUserId(db, userNumber)
     }
 
     if isInstaReel(input) {
-        basey.InsertLink(db, id, input)
+        basey.InsertLink(db, userid, input)
         return "inserted link :)"
+    } 
+    // we are going to make an assumption that
+    // if the user doesn't type a link then we have
+    // to make sense of what the user wants
+    // we are going to do this the super cool way
+    // the 333 way parallel search systems way. 
+    fmt.Println("input = ", input)
+
+    // step 1 extract the recipes from the links
+    links, err := basey.GetLinksForUser(db, userid)
+    if err != nil {
+       return "error"
     }
+    fmt.Println(len(links))
+    for i := 0; i < len(links); i++ {
+        fmt.Println(links[i].Hyperlink)
+    }
+    // now we have all the links
+    // now the next step is to extract the content out
+    // the links and store it in memory in some kinda a 
+    // data structure prolly linkid -> string
+    // then index that datastructure to search 333 way...
+    // this project is kinda fun ngl
     return "working on other features" 
 }
 
@@ -75,6 +99,7 @@ func smsHandler(context *gin.Context) {
             requestParams["Body"][0],
             requestParams["From"][0])
     
+    fmt.Println(res)
     message := &twiml.MessagingMessage {
         Body: res,
     }

@@ -35,9 +35,9 @@ CREATE TABLE LINKS (
 );
 */
 type Link struct {
-    id          uint64
-    userid      uint64
-    hyperlink   string
+    Id          uint64
+    Userid      uint64
+    Hyperlink   string
 }
 
 func OpenDatabase() *sql.DB {
@@ -89,6 +89,28 @@ func LookupUserId(db *sql.DB, s string) int {
 
 // TODO: Write a function that returns an array of links for a user
 // SELECT hyperlink from LINKS WHERE userid = usierid -> to array give all the links
-func GetLinksForUser(db *sql.DB, user_id int) []Link {
-    return make([]Link, 10)
+func GetLinksForUser(db *sql.DB, user_id int) ([]Link, error) {
+    //sqlQuery := "SELECT * FROM LINKS WHERE user_id = $1"
+    var links []Link
+    rows, err := db.Query("SELECT * FROM LINKS WHERE user_id=$1", user_id)
+    if err != nil {
+        return nil, fmt.Errorf("GetLinksForUser (%v)", user_id, err)
+    }
+
+    defer rows.Close()
+    for rows.Next() {
+        var link Link
+        err := rows.Scan(&link.Id, &link.Hyperlink, &link.Userid)
+        if err != nil {
+            return links, err
+        }
+        links = append(links, link)
+    }
+
+    err = rows.Err()
+    if err != nil {
+        return nil, err
+    }
+
+    return links, nil
 }
