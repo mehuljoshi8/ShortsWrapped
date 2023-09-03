@@ -8,13 +8,13 @@ import (
     "github.com/twilio/twilio-go/twiml"
     "net/url"
     "database/sql"
-    
 )
 
 var db *sql.DB
+
 // to select instareel caption
 // see document.querySelector("._a9zs");
-func isInstaReelLink(s string) bool {
+func isInstaReel(s string) bool {
     const instaReelStarter = "https://www.instagram.com/reel/"
     if len(s) < len(instaReelStarter) {
         return false
@@ -28,36 +28,55 @@ func isInstaReelLink(s string) bool {
     return true
 }
 
-// TODO: implement a tiny URL server
-// where we can shorten links and store them.
-func smsHandler(context *gin.Context) {
+// Parses the body and returns the request parameters.
+// which is nothing more than a map of string -> []string
+// (denoted Values) as by the url package.
+// returns nil on error.
+func getRequestParameters(context *gin.Context) url.Values {
     body, err := io.ReadAll(context.Request.Body)
     if err != nil {
         context.Abort()
-        return 
+        return nil
     }
-
-    // type(reqParams) = map[string]string
-    reqParams, err := url.ParseQuery(string(body))
+   
+    requestParams, err := url.ParseQuery(string(body))
     if err != nil {
         context.Abort()
-        return
+        return nil
     }
     
-    input := reqParams["Body"][0]
-    userNumber := reqParams["From"][0]
+    return requestParams
+}
+
+
+func routeInput(input string, userNumber string) string {
     id := basey.LookupUserId(db, userNumber)
     if id == -1 {
         basey.InsertUser(db, userNumber)
         id = basey.LookupUserId(db, userNumber)
     }
 
-    if isInstaReelLink(input) {
+    if isInstaReel(input) {
         basey.InsertLink(db, id, input)
+        return "inserted link :)"
     }
+    return "working on other features" 
+}
 
+// TODO: implement a tiny URL server
+// where we can shorten links and store them.
+func smsHandler(context *gin.Context) {
+    requestParams := getRequestParameters(context)
+    if requestParams == nil {
+        return
+    }
+    
+    res := routeInput(
+            requestParams["Body"][0],
+            requestParams["From"][0])
+    
     message := &twiml.MessagingMessage {
-        Body: "Let the chaos begin",
+        Body: res,
     }
 
     twimlResult, err := twiml.Messages([]twiml.Element{message})
