@@ -57,8 +57,6 @@ func scrapeRecipe(link string) {
         return
     }
 
-    //io.ReadAll(res.Body)
-
     defer res.Body.Close()
     if res.StatusCode != 200 {
         return
@@ -74,6 +72,7 @@ func scrapeRecipe(link string) {
 
     body, _ := io.ReadAll(res.Body)
     fmt.Println(string(body))
+    
 }
 
 // returns a string result that is outputted to the user
