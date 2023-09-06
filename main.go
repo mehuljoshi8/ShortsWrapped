@@ -66,26 +66,29 @@ func getRequestParameters(context *gin.Context) url.Values {
 
 // extracts the recipe for the reelId and
 // outs it to the console
-func scrapeRecipe(reelId string) {
+func scrapeRecipe(reelId string) string {
     res, err := http.Get(instaReelStarter + reelId + "/")
     if err != nil {
-        return
+        return "error"
     }
 
     defer res.Body.Close()
     if res.StatusCode != 200 {
-        return
+        return "error"
     }
-
+    
     doc, _ := goquery.NewDocumentFromReader(res.Body)
+    recipeContent := ""
     doc.Find("meta").Each(func(i int, s *goquery.Selection) {
         if name, _ := s.Attr("property"); name == "og:title" {
             content, _ := s.Attr("content")
             // content is what the recipe is stored in if
             // it's in the little 3 bubbles
-            fmt.Println(content)
+            recipeContent += content
         }
     })
+
+    return recipeContent
 }
 
 // returns a string result that is outputted to the user
@@ -102,15 +105,16 @@ func routeInput(input string, userNumber string) string {
         return "inserted reel identifer"
     }
 
-    
+    fmt.Println("input = " + input) 
     // working on search feature
     links, err := basey.GetLinksForUser(db, userid)
     if err != nil {
         return "error"
     }
 
-    for _, link := range links {
-        scrapeRecipe(link.ReelIdentifer)
+    recipes := make([]string, len(links))
+    for i, link := range links {
+        recipes[i] = scrapeRecipe(link.ReelIdentifer)
     }
 
     return "working on search"
