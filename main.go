@@ -14,10 +14,11 @@ import (
 
 var db *sql.DB
 
+const instaReelStarter = "https://www.instagram.com/reel/"
+
 // to select instareel caption
 // see document.querySelector("._a9zs");
 func isInstaReel(s string) bool {
-    const instaReelStarter = "https://www.instagram.com/reel/"
     if len(s) < len(instaReelStarter) {
         return false
     }
@@ -28,6 +29,19 @@ func isInstaReel(s string) bool {
         }
     }
     return true
+}
+
+// Instagram reels are in the form of
+// https://www.instagram.com/reel/<IDENTIFER>/id=...
+// This function just returns the IDENTIFER for the reel.
+func getReelIdentifer(link string) string {
+    i := len(link) - 1
+    for link[i] != '/' {
+        i--
+    }
+
+    fmt.Println(link[len(instaReelStarter):i])
+    return link[len(instaReelStarter):i]
 }
 
 // Parses the body and returns the request parameters.
@@ -50,9 +64,10 @@ func getRequestParameters(context *gin.Context) url.Values {
     return requestParams
 }
 
-
-func scrapeRecipe(link string) {
-    res, err := http.Get(link)
+// extracts the recipe for the reelId and
+// outs it to the console
+func scrapeRecipe(reelId string) {
+    res, err := http.Get(instaReelStarter + reelId + "/")
     if err != nil {
         return
     }
@@ -62,17 +77,15 @@ func scrapeRecipe(link string) {
         return
     }
 
-    doc, err := goquery.NewDocumentFromReader(res.Body)
-    if err != nil {
-        return
-    }
-    div := doc.Find("._a9zs")
-    //fmt.Println(res.Body)
-    fmt.Println(len(div.Nodes))
-
-    body, _ := io.ReadAll(res.Body)
-    fmt.Println(string(body))
-    
+    doc, _ := goquery.NewDocumentFromReader(res.Body)
+    doc.Find("meta").Each(func(i int, s *goquery.Selection) {
+        if name, _ := s.Attr("property"); name == "og:title" {
+            content, _ := s.Attr("content")
+            // content is what the recipe is stored in if
+            // it's in the little 3 bubbles
+            fmt.Println(content)
+        }
+    })
 }
 
 // returns a string result that is outputted to the user
@@ -85,21 +98,22 @@ func routeInput(input string, userNumber string) string {
     }
 
     if isInstaReel(input) {
-        basey.InsertLink(db, userid, input)
-        return "inserted link :)"
-    } 
+        basey.InsertLink(db, userid, getReelIdentifer(input))
+        return "inserted reel identifer"
+    }
 
-    fmt.Println("input = ", input)
-
-    // step 1 extract the recipes from the links
+    
+    // working on search feature
     links, err := basey.GetLinksForUser(db, userid)
     if err != nil {
-       return "error"
+        return "error"
     }
-    fmt.Println(links[0].Hyperlink) 
-    scrapeRecipe(links[0].Hyperlink)
-    // extract the contents out of link 0
-    return "working on other features" 
+
+    for _, link := range links {
+        scrapeRecipe(link.ReelIdentifer)
+    }
+
+    return "working on search"
 }
 
 // TODO: implement a tiny URL server

@@ -35,9 +35,9 @@ CREATE TABLE LINKS (
 );
 */
 type Link struct {
-    Id          uint64
-    Userid      uint64
-    Hyperlink   string
+    Id              uint64
+    UserId          uint64
+    ReelIdentifer   string
 }
 
 func OpenDatabase() *sql.DB {
@@ -45,8 +45,6 @@ func OpenDatabase() *sql.DB {
     db, err := sql.Open("postgres", psqlconn)
     checkError(err)
     fmt.Println("Connected Successfully to basey :)")
-    //FindUser(db, "+14259431674")
-    //InsertLink(db, 1, "https://www.instagram.com/reel/Cv49nyaLZpx/?utm_source=ig_web_copy_link&igshid=MzRlODBiNWFlZA==")
     return db
 }
 
@@ -87,10 +85,7 @@ func LookupUserId(db *sql.DB, s string) int {
     return id
 }
 
-// TODO: Write a function that returns an array of links for a user
-// SELECT hyperlink from LINKS WHERE userid = usierid -> to array give all the links
 func GetLinksForUser(db *sql.DB, user_id int) ([]Link, error) {
-    //sqlQuery := "SELECT * FROM LINKS WHERE user_id = $1"
     var links []Link
     rows, err := db.Query("SELECT * FROM LINKS WHERE user_id=$1", user_id)
     if err != nil {
@@ -100,7 +95,7 @@ func GetLinksForUser(db *sql.DB, user_id int) ([]Link, error) {
     defer rows.Close()
     for rows.Next() {
         var link Link
-        err := rows.Scan(&link.Id, &link.Hyperlink, &link.Userid)
+        err := rows.Scan(&link.Id, &link.ReelIdentifer, &link.UserId)
         if err != nil {
             return links, err
         }
