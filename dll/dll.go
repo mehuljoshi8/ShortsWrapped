@@ -23,6 +23,7 @@ type LLIter struct {
 
 // A type alias for a comparator function that the client has to define
 type LLPayloadComparatorFn func(p1 *interface{}, p2 *interface{}) int
+type LLPayloadFreeFn func(i *interface{}) *interface{}
 
 // allocate a new linked list and returns it to client
 func AllocateLinkedList() *LinkedList {
@@ -71,4 +72,44 @@ func (ll *LinkedList) Slice() (bool, *interface{}) {
 // TODO: Write a sorting function to sort the linked list
 func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) {
 	return
+}
+
+// TODO: Write the Iterator method which returns an LLIterator
+// for the given linked list at the pos (0 = head; 1 = tail)
+func (ll *LinkedList) Iterator(pos int) *LLIter {
+    return nil
+}
+
+// TODO: Complete the implementation of has next.
+// true if can advnace (not tail)
+// false otherwise (tail)
+func (ll_iter *LLIter) HasNext() bool {
+    return false
+}
+
+// TODO: Complete Iteration of Next
+func (ll_iter *LLIter) Next() bool {
+    return false
+}
+
+// TODO: Complete HasPrev implementation
+func (ll_iter *LLIter) HasPrev() bool {
+    return false
+}
+
+// TODO: complete getPayload
+// Returns the payload that the iterator is currently
+// pointing at
+func (ll_iter *LLIter) GetPayload() *interface{} {
+    return nil
+}
+
+// TODO: Complete the delete function
+func (ll_iter *LLIter) Delete(payload_free_fn LLPayloadFreeFn) bool {
+    return false
+}
+
+// TODO: Complete the InsertBefore function
+func (ll_iter *LLIter) InsertBefore(p *interface{}) bool {
+    return false
 }
