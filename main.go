@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"recipeBot/basey"
+    "recipeBot/dll"
 )
 
 var db *sql.DB
@@ -150,8 +151,8 @@ func smsHandler(context *gin.Context) {
 	}
 }
 
-func main() {
-	db = basey.OpenDatabase()
+func main() { 
+    db = basey.OpenDatabase()
 	defer db.Close()
 	router := gin.Default()
 	router.POST("/sms", smsHandler)
