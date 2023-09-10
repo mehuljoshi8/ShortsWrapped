@@ -114,29 +114,48 @@ func (ll *LinkedList) Slice() (bool, interface{}) {
 // TODO: Write a sorting function to sort the linked list
 func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) {
 	// mergesort on a linked list is kinda cool
-    return
+     
 }
 
 // TODO: Write the Iterator method which returns an LLIterator
 // for the given linked list at the pos (0 = head; 1 = tail)
 func (ll *LinkedList) Iterator(pos int) *LLIter {
-    return nil
+    ll_iter := new(LLIter)
+    ll_iter.list = ll
+    if pos == 0 {
+        ll_iter.node = ll.head
+    } else {
+        ll_iter.node = ll.tail
+    }
+    return ll_iter
 }
 
 // TODO: Complete the implementation of has next.
 // true if can advnace (not tail)
 // false otherwise (tail)
 func (ll_iter *LLIter) HasNext() bool {
-    return false
+    return ll_iter.node.next != nil
 }
 
 // TODO: Complete Iteration of Next
 func (ll_iter *LLIter) Next() bool {
+    if ll_iter.HasNext() {
+        ll_iter.node = ll_iter.node.next
+        return true
+    }
     return false
 }
 
 // TODO: Complete HasPrev implementation
 func (ll_iter *LLIter) HasPrev() bool {
+    return ll_iter.node.prev != nil
+}
+
+func (ll_iter *LLIter) Prev() bool {
+    if ll_iter.HasPrev() {
+        ll_iter.node = ll_iter.node.prev
+        return true
+    }
     return false
 }
 
@@ -144,7 +163,7 @@ func (ll_iter *LLIter) HasPrev() bool {
 // Returns the payload that the iterator is currently
 // pointing at
 func (ll_iter *LLIter) GetPayload() interface{} {
-    return nil
+    return ll_iter.node.payload
 }
 
 // TODO: Complete the delete function
