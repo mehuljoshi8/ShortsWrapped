@@ -1,5 +1,7 @@
 package dll
 
+import "fmt"
+
 // A DLLNode contains a customer-supplied payload
 // and next and prev pointers.
 type DLLNode struct {
@@ -17,7 +19,7 @@ type LinkedList struct {
 
 // This struct represents the state of an iterator.
 type LLIter struct {
-	list LinkedList
+	list *LinkedList
 	node *DLLNode
 }
 
@@ -111,13 +113,58 @@ func (ll *LinkedList) Slice() (bool, interface{}) {
     return false, nil
 }
 
-// TODO: Write a sorting function to sort the linked list
-func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) {
-	// mergesort on a linked list is kinda cool
-     
+// auxillary function to merge two sorted lists
+// returns a merged list.
+func merge(n1 *DLLNode, n2 *DLLNode, comp_fn LLPayloadComparatorFn) *DLLNode {
+    dummy := new(DLLNode)
+    curr_dummy := dummy
+    for n1 != nil && n2 != nil {
+        // v > 0; n1 > n2 => take n2
+        if comp_fn(n1.payload, n2.payload) > 0 {
+            curr_dummy.next = n2
+            n2.prev = curr_dummy
+            tmp := n2.next
+            n2.next = nil
+            if tmp != nil {
+                tmp.prev = nil
+            }
+            n2 = tmp
+        } else {
+            curr_dummy.next = n1
+            n1.prev = curr_dummy
+            tmp := n1.next
+            n1.next = nil
+            if tmp != nil {
+                tmp.prev = nil
+            }
+            n1 = tmp
+        }
+        curr_dummy = curr_dummy.next
+    }
+
+    // if we have leftover
+    if n1 != nil {
+        curr_dummy.next = n1
+        n1.prev = curr_dummy
+    }
+   
+    if n2 != nil {
+        curr_dummy.next = n2
+        n2.prev = curr_dummy
+    }
+
+    return dummy.next
 }
 
-// TODO: Write the Iterator method which returns an LLIterator
+
+
+// sorts the list that ll points to using merge sort.
+func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) { 
+    // we always start by sorting ascending then if it's decending we just reverse the list
+    // define a divide function that takes a list and divides it in half and does that
+    // recursively and builds up the solution
+}
+
 // for the given linked list at the pos (0 = head; 1 = tail)
 func (ll *LinkedList) Iterator(pos int) *LLIter {
     ll_iter := new(LLIter)
@@ -130,14 +177,12 @@ func (ll *LinkedList) Iterator(pos int) *LLIter {
     return ll_iter
 }
 
-// TODO: Complete the implementation of has next.
 // true if can advnace (not tail)
 // false otherwise (tail)
 func (ll_iter *LLIter) HasNext() bool {
     return ll_iter.node.next != nil
 }
 
-// TODO: Complete Iteration of Next
 func (ll_iter *LLIter) Next() bool {
     if ll_iter.HasNext() {
         ll_iter.node = ll_iter.node.next
@@ -146,7 +191,6 @@ func (ll_iter *LLIter) Next() bool {
     return false
 }
 
-// TODO: Complete HasPrev implementation
 func (ll_iter *LLIter) HasPrev() bool {
     return ll_iter.node.prev != nil
 }
@@ -159,7 +203,6 @@ func (ll_iter *LLIter) Prev() bool {
     return false
 }
 
-// TODO: complete getPayload
 // Returns the payload that the iterator is currently
 // pointing at
 func (ll_iter *LLIter) GetPayload() interface{} {

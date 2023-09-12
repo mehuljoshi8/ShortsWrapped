@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"recipeBot/basey"
-   // "recipeBot/dll"
+    //"recipeBot/dll"
 )
 
 var db *sql.DB
@@ -149,6 +149,11 @@ func smsHandler(context *gin.Context) {
 		context.Header("Content-Type", "text/xml")
 		context.String(http.StatusOK, twimlResult)
 	}
+}
+
+// Comparator function for dll
+func comp_fn(p1 interface{}, p2 interface{}) int {
+    return p1.(int) - p2.(int)
 }
 
 func main() { 
