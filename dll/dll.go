@@ -1,7 +1,5 @@
 package dll
 
-import "fmt"
-
 // A DLLNode contains a customer-supplied payload
 // and next and prev pointers.
 type DLLNode struct {
@@ -114,30 +112,25 @@ func (ll *LinkedList) Slice() (bool, interface{}) {
 }
 
 // auxillary function to merge two sorted lists
-// returns a merged list.
-func merge(n1 *DLLNode, n2 *DLLNode, comp_fn LLPayloadComparatorFn) *DLLNode {
+// returns a merged list's head and tail
+func merge(n1 *DLLNode, n2 *DLLNode, comp_fn LLPayloadComparatorFn) (*DLLNode, *DLLNode) {
     dummy := new(DLLNode)
     curr_dummy := dummy
+    var selected, tmp *DLLNode
     for n1 != nil && n2 != nil {
-        // v > 0; n1 > n2 => take n2
         if comp_fn(n1.payload, n2.payload) > 0 {
-            curr_dummy.next = n2
-            n2.prev = curr_dummy
-            tmp := n2.next
-            n2.next = nil
-            if tmp != nil {
-                tmp.prev = nil
-            }
-            n2 = tmp
+            selected = n2
+            n2 = n2.next
         } else {
-            curr_dummy.next = n1
-            n1.prev = curr_dummy
-            tmp := n1.next
-            n1.next = nil
-            if tmp != nil {
-                tmp.prev = nil
-            }
-            n1 = tmp
+            selected = n1
+            n1 = n1.next
+        }
+        curr_dummy.next = selected
+        selected.prev = curr_dummy
+        tmp = selected.next
+        selected.next = nil
+        if tmp != nil {
+            tmp.prev = nil
         }
         curr_dummy = curr_dummy.next
     }
@@ -152,17 +145,49 @@ func merge(n1 *DLLNode, n2 *DLLNode, comp_fn LLPayloadComparatorFn) *DLLNode {
         curr_dummy.next = n2
         n2.prev = curr_dummy
     }
+    
+    // move curr_dummy to the end of the list
+    for curr_dummy.next != nil {
+        curr_dummy = curr_dummy.next    
+    }
 
-    return dummy.next
+    return dummy.next, curr_dummy
 }
 
+// returns the head and tail of the newly merged list.
+func mergeSort(n *DLLNode, comp_fn LLPayloadComparatorFn) (*DLLNode, *DLLNode) {
+    var slow, fast *DLLNode
+    slow = n
+    fast = n.next
+    if fast == nil {
+        // case single elem list;
+        return slow, slow
+    }
+    // find mid point using two pointers.
+    for fast != nil && fast.next != nil {
+        slow = slow.next
+        fast = fast.next.next
+    }
 
+    // now slow points to the middle elem.
+    slow = slow.next
+    slow.prev.next = nil
+    slow.prev = nil
+    // n is the start of the first list
+    // slow is the start of the other one.
+    left, _ := mergeSort(n, comp_fn)
+    right, _ := mergeSort(slow, comp_fn)
+    return merge(left, right, comp_fn)
+}
 
 // sorts the list that ll points to using merge sort.
-func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) { 
-    // we always start by sorting ascending then if it's decending we just reverse the list
-    // define a divide function that takes a list and divides it in half and does that
-    // recursively and builds up the solution
+func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) {
+    if ll.GetSize() == 0 {
+        return
+    }
+    head, tail := mergeSort(ll.head, comparator_fn)
+    ll.head = head
+    ll.tail = tail
 }
 
 // for the given linked list at the pos (0 = head; 1 = tail)
