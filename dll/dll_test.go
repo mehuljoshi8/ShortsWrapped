@@ -136,24 +136,74 @@ func TestSort(t *testing.T) {
     }
 }
 
-/*
-func TestAllocateIterator(t *testing.T) {
+func TestIterator(t *testing.T) {
+    // Test Iterator creation, and incrementation.
+    ll := AllocateLinkedList()
+    for i := 0; i < 4; i++ {
+        ll.Append(i)
+    }
 
+    ll_iter := ll.Iterator(1)
+    if ll_iter.node != ll.tail {
+        t.Errorf("failed to create iterator starting at tail")
+    }
+
+    count := 0
+    
+    for ll_iter.Next() {
+        count++
+    }
+    
+    if count != 0 {
+        t.Errorf("error tail doesn't have a next")
+    }
+
+    for ll_iter.Prev() {
+        count++
+    }
+
+    if count != 3 {
+        t.Errorf("expected count = %q, actual = %q", 3, count)
+    }
+
+    count = 0
+    
+    for ll_iter.Next() {
+        count++
+    }
+    
+    if count != 3 {
+        t.Errorf("expected count = 3, actual = %q", count)
+    }
+
+    if ll_iter.GetPayload() != 3 {
+        t.Errorf("expected 3, got %q", ll_iter.GetPayload())
+    }
+
+    ll_iter = ll.Iterator(0)
+    ll_iter.Next()
+    if ll_iter.GetPayload() != 1 {
+        t.Errorf("expected 2, got %q", ll_iter.GetPayload())
+    }
 }
 
-func TestMoveIterator(t *testing.T) {
 
+func TestIteratorDeleteEmptyList(t *testing.T) {
+    ll := AllocateLinkedList()
+    ll_iter := ll.Iterator(0)
+    b, v := ll_iter.Delete()
+    if b || v != nil {
+        t.Errorf("Deleting on an empty list shouldn't return non-empty vals")
+    }
 }
 
-func TestIteratorGetPayload(t *testing.T) {
-
+func TestIteratorDeleteSingleElemList(t *testing.T) {
+    ll := AllocateLinkedList()
+    ll.Append(57)
+    ll_iter := ll.Iterator(1)
+    b, v := ll_iter.Delete()
+    if !b || v != 57 {
+        t.Errorf("expected (true, 57), got (%t, %q)", b, v)
+    }
 }
 
-func TestIteratorDelete(t *testing.T) {
-
-}
-
-func TestIteratorInsertBefore(t *testing.T) {
-
-}
-*/

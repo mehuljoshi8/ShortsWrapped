@@ -23,7 +23,6 @@ type LLIter struct {
 
 // A type alias for a comparator function that the client has to define
 type LLPayloadComparatorFn func(p1 interface{}, p2 interface{}) int
-type LLPayloadFreeFn func(i interface{}) interface{}
 
 // allocate a new linked list and returns it to client
 func AllocateLinkedList() *LinkedList {
@@ -234,39 +233,21 @@ func (ll_iter *LLIter) GetPayload() interface{} {
     return ll_iter.node.payload
 }
 
-// Delete the node the iterator is pointing to.  After deletion, the iterator:
-//
-// - invalid if the iterator was empty.
-//
-// - the successor of the deleted node, if there is one.
-//
-// - the predecessor of the deleted node, if the iterator was pointing at
-//   the tail.
-//
-// Arguments:
-//
-// - iter:  the iterator to delete from
-//
-// - payload_free_function: invoked to free the payload
-//
 // Returns:
-//
-// - false if the deletion succeeded, but the list is now empty
-//
-// - true if the deletion succeeded, and the list is still non-empty
-func (ll_iter *LLIter) Delete(payload_free_fn LLPayloadFreeFn) bool {
+// - true if the deletion succeeded, false otherwise
+// - if ll_iter.node was pointing to the tail we move the node back 1
+// - if the node was pointing elsewhere we advance it.
+func (ll_iter *LLIter) Delete() (bool, interface{}) {
     if ll_iter.node == nil || ll_iter.ll == nil {
         // this is an invalid iterator
-        return false
+        return false, nil
     }
     
     var p interface{}
-    // handle single elem case (now list is empty) -> return false
     if ll_iter.ll.GetSize() == 1 {
         _, p = ll_iter.ll.Pop()
-        payload_free_fn(p)
         ll_iter.node = nil
-        return false
+        return true, p
     }
     
     if ll_iter.node == ll_iter.ll.tail {
@@ -287,11 +268,27 @@ func (ll_iter *LLIter) Delete(payload_free_fn LLPayloadFreeFn) bool {
         ll_iter.ll.size--
     }
 
-    payload_free_fn(p)
-    return true
+    return true, nil
 }
 
-// TODO: Complete the InsertBefore function
-func (ll_iter *LLIter) InsertBefore(p interface{}) bool {
-    return false
+// Insert an element right before the node that the interator points
+// to. 
+func (ll_iter *LLIter) InsertBefore(p interface{}) {
+    if ll_iter == nil || ll_iter.node == nil || ll_iter.ll == nil {
+        return
+    }
+    
+    if ll_iter.node == ll_iter.ll.head {
+       ll_iter.ll.Push(p)
+       return
+    }
+    
+    toInsert := new(DLLNode)
+    // get the nodes prev node
+    prev := ll_iter.node.prev
+    prev.next = toInsert
+    toInsert.prev = prev
+    toInsert.next = ll_iter.node
+    ll_iter.node.prev = toInsert
+    ll_iter.ll.size++
 }
