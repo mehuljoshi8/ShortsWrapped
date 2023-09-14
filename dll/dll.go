@@ -208,6 +208,7 @@ func (ll_iter *LLIter) HasNext() bool {
     return ll_iter.node.next != nil
 }
 
+
 func (ll_iter *LLIter) Next() bool {
     if ll_iter.HasNext() {
         ll_iter.node = ll_iter.node.next

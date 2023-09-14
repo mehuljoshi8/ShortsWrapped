@@ -74,6 +74,17 @@ func TestPushPopAppendSlice(t *testing.T) {
         }
         i--
     }
+
+    ll.Append(11)
+    _, v = ll.Pop()
+    if v.(int) != 11 {
+        t.Errorf("append to an empty list not working as expected")
+    }
+
+    b, v = ll.Slice()
+    if b != false && v != nil {
+        t.Errorf("slice on empty list returns non-empty")
+    }
 }
 
 // Comparator function for dll
@@ -84,6 +95,20 @@ func comp_fn(p1 interface{}, p2 interface{}) int {
 func TestSort(t *testing.T) {
     // create a linked list with random elems    
     ll := AllocateLinkedList()
+    
+    ll.Sort(true, comp_fn)
+    
+    if ll.GetSize() > 0 {
+        t.Errorf("sorting on an empty list increased size")
+    }
+
+    ll.Push(1)
+    ll.Sort(true, comp_fn)
+    if ll.head.payload.(int) != 1 {
+        t.Errorf("error sorting one element list failed")
+    }
+    ll.Pop()
+
     rand.Seed(time.Now().Unix())
     size := rand.Intn(10000)
     t.Log(size)
