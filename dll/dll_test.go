@@ -141,7 +141,7 @@ func TestAllocateIterator(t *testing.T) {
 
 }
 
-func TestIncrementIterator(t *testing.T) {
+func TestMoveIterator(t *testing.T) {
 
 }
 

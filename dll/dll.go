@@ -17,7 +17,7 @@ type LinkedList struct {
 
 // This struct represents the state of an iterator.
 type LLIter struct {
-	list *LinkedList
+	ll *LinkedList
 	node *DLLNode
 }
 
@@ -193,7 +193,7 @@ func (ll *LinkedList) Sort(ascending bool, comparator_fn LLPayloadComparatorFn) 
 // for the given linked list at the pos (0 = head; 1 = tail)
 func (ll *LinkedList) Iterator(pos int) *LLIter {
     ll_iter := new(LLIter)
-    ll_iter.list = ll
+    ll_iter.ll = ll
     if pos == 0 {
         ll_iter.node = ll.head
     } else {
@@ -207,7 +207,6 @@ func (ll *LinkedList) Iterator(pos int) *LLIter {
 func (ll_iter *LLIter) HasNext() bool {
     return ll_iter.node.next != nil
 }
-
 
 func (ll_iter *LLIter) Next() bool {
     if ll_iter.HasNext() {
@@ -235,9 +234,69 @@ func (ll_iter *LLIter) GetPayload() interface{} {
     return ll_iter.node.payload
 }
 
-// TODO: Complete the delete function
+// Delete the node the iterator is pointing to.  After deletion, the iterator:
+//
+// - invalid if the iterator was empty.
+//
+// - the successor of the deleted node, if there is one.
+//
+// - the predecessor of the deleted node, if the iterator was pointing at
+//   the tail.
+//
+// Arguments:
+//
+// - iter:  the iterator to delete from
+//
+// - payload_free_function: invoked to free the payload
+//
+// Returns:
+//
+// - false if the deletion succeeded, but the list is now empty
+//
+// - true if the deletion succeeded, and the list is still non-empty
+/*
+// This struct represents the state of an iterator.
+type LLIter struct {
+	list *LinkedList
+	node *DLLNode
+}
+ */
+
 func (ll_iter *LLIter) Delete(payload_free_fn LLPayloadFreeFn) bool {
-    return false
+    if ll_iter.node == nil || ll_iter.ll == nil {
+        // this is an invalid iterator
+        return false
+    }
+    
+    var p interface{}
+    // handle single elem case (now list is empty) -> return false
+    if ll_iter.ll.GetSize() == 1 {
+        _, p = ll_iter.ll.Pop()
+        payload_free_fn(p)
+        ll_iter.node = nil
+        return false
+    }
+    
+    if ll_iter.node == ll_iter.ll.tail {
+        // have to assign ll_iter.node to the previous node
+        ll_iter.node = ll_iter.node.prev
+        _, p = ll_iter.ll.Slice()
+    } else if ll_iter.node == ll_iter.ll.head {
+        ll_iter.node = ll_iter.node.next
+        _, p = ll_iter.ll.Pop()
+    } else {
+        // have to do middle of the list random deletion
+        p = ll_iter.node.payload
+        ll_iter.node = ll_iter.node.next
+        ll_iter.node.prev.next = nil
+        ll_iter.node.prev.prev.next = nil
+        ll_iter.node.prev = ll_iter.node.prev.prev
+        ll_iter.node.prev.next = ll_iter.node
+        ll_iter.ll.size--
+    }
+
+    payload_free_fn(p)
+    return true
 }
 
 // TODO: Complete the InsertBefore function
