@@ -254,14 +254,6 @@ func (ll_iter *LLIter) GetPayload() interface{} {
 // - false if the deletion succeeded, but the list is now empty
 //
 // - true if the deletion succeeded, and the list is still non-empty
-/*
-// This struct represents the state of an iterator.
-type LLIter struct {
-	list *LinkedList
-	node *DLLNode
-}
- */
-
 func (ll_iter *LLIter) Delete(payload_free_fn LLPayloadFreeFn) bool {
     if ll_iter.node == nil || ll_iter.ll == nil {
         // this is an invalid iterator
