@@ -3,7 +3,7 @@ package dll
 // A DLLNode contains a customer-supplied payload
 // and next and prev pointers.
 type DLLNode struct {
-	payload interface{}
+	payload *interface{}
 	next    *DLLNode
 	prev    *DLLNode
 }
@@ -22,7 +22,7 @@ type LLIter struct {
 }
 
 // A type alias for a comparator function that the client has to define
-type LLPayloadComparatorFn func(p1 interface{}, p2 interface{}) int
+type LLPayloadComparatorFn func(p1 *interface{}, p2 *interface{}) int
 
 // allocate a new linked list and returns it to client
 func AllocateLinkedList() *LinkedList {
@@ -42,7 +42,7 @@ func (ll *LinkedList) GetSize() uint64 {
 
 // adds a new element to the head of the linked list.
 // arguments: the payload to push
-func (ll *LinkedList) Push(payload interface{}) {
+func (ll *LinkedList) Push(payload *interface{}) {
     // have to handle the case where there are no elems
     node := new(DLLNode)
     node.payload = payload
@@ -59,7 +59,7 @@ func (ll *LinkedList) Push(payload interface{}) {
 
 // pops an element from the head of the linked list
 // and returns the payload that was provided nil otherwise
-func (ll *LinkedList) Pop() (bool, interface{}) {
+func (ll *LinkedList) Pop() (bool, *interface{}) {
 	if ll.head != nil {
         node := ll.head
         ll.head = ll.head.next
@@ -78,7 +78,7 @@ func (ll *LinkedList) Pop() (bool, interface{}) {
 
 // appends a new element to the tail of the list
 // returns false on failure
-func (ll *LinkedList) Append(payload interface{}) {
+func (ll *LinkedList) Append(payload *interface{}) {
     node := new(DLLNode)
     node.payload = payload
     node.prev = ll.tail 
@@ -94,7 +94,7 @@ func (ll *LinkedList) Append(payload interface{}) {
 
 // pops an element from the tail of the linked list.
 // returns the payload and a boolean to the client.
-func (ll *LinkedList) Slice() (bool, interface{}) {
+func (ll *LinkedList) Slice() (bool, *interface{}) {
     if ll.tail != nil {
         node := ll.tail
         ll.tail = ll.tail.prev
@@ -229,7 +229,7 @@ func (ll_iter *LLIter) Prev() bool {
 
 // Returns the payload that the iterator is currently
 // pointing at
-func (ll_iter *LLIter) GetPayload() interface{} {
+func (ll_iter *LLIter) GetPayload() *interface{} {
     return ll_iter.node.payload
 }
 
@@ -237,13 +237,13 @@ func (ll_iter *LLIter) GetPayload() interface{} {
 // - true if the deletion succeeded, false otherwise
 // - if ll_iter.node was pointing to the tail we move the node back 1
 // - if the node was pointing elsewhere we advance it.
-func (ll_iter *LLIter) Delete() (bool, interface{}) {
+func (ll_iter *LLIter) Delete() (bool, *interface{}) {
     if ll_iter.node == nil || ll_iter.ll == nil {
         // this is an invalid iterator
         return false, nil
     }
     
-    var p interface{}
+    var p *interface{}
     if ll_iter.ll.GetSize() == 1 {
         _, p = ll_iter.ll.Pop()
         ll_iter.node = nil
@@ -273,7 +273,7 @@ func (ll_iter *LLIter) Delete() (bool, interface{}) {
 
 // Insert an element right before the node that the interator points
 // to. 
-func (ll_iter *LLIter) InsertBefore(p interface{}) {
+func (ll_iter *LLIter) InsertBefore(p *interface{}) {
     if ll_iter == nil || ll_iter.node == nil || ll_iter.ll == nil {
         return
     }
