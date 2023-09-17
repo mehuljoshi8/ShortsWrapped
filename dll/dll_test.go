@@ -2,10 +2,20 @@ package dll
 
 import (
     "testing"
+    "time"
+    "math/rand"
 )
 
+
+// defining a global var ll for all the tests.
+var ll *LinkedList
+
 func TestAllocateLinkedList(t *testing.T) {
-    ll := AllocateLinkedList()
+    ll = AllocateLinkedList()
+    if ll.head != nil || ll.tail != nil {
+        t.Errorf("ll.head or tail is non-nil")
+    }
+
     got := ll.GetSize()
     var want uint64
     want = 0
@@ -14,13 +24,17 @@ func TestAllocateLinkedList(t *testing.T) {
         t.Errorf("got %q, wanted %q", got, want)
     }
 }
-/*
-func TestPushPop(t *testing.T) {
-    // we are going to test if push and pop work as expected
-    // let's add nums 1,2,3,4,5,6 into the list
-    ll := AllocateLinkedList()
+
+func TestEmptyPop(t *testing.T) {
+    b, v := ll.Pop()
+    if b || v != nil {
+        t.Errorf("Error empty list pop resulted in non-empty vals")
+    }
+}
+
+func TestPushPopBasic(t *testing.T) {
     for i := 1; i <= 6; i++ {
-        ll.Push(&i)
+        ll.Push(i)
         if ll.GetSize() != uint64(i) {
             t.Errorf("push not updating size: got %q, wanted %q", ll.GetSize(), i)
         }
@@ -36,31 +50,28 @@ func TestPushPop(t *testing.T) {
             t.Errorf("pop not decrementing size: got %q, wanted %q", ll.GetSize(), i-1)
         }
     }
+}
 
-    b, v := ll.Pop()
-    if b != false && v != nil {
-        t.Errorf("pop on empty list not returning the correct values: got (%t, %v), wanted (%t, %v)", b, v, false, nil)
+func TestPushSliceSingleElem(t *testing.T) {
+    ll.Push(1)
+    b, v := ll.Slice()
+    if !b && v != 1 {
+        t.Errorf("Push -> Slice not working as expected")
     }
 }
 
-func TestPushPopAppendSlice(t *testing.T) {
-    ll := AllocateLinkedList()
-    ll.Push(1)
-    b, v :=  ll.Slice()
-    if b != true && v != 1 {
-        t.Errorf("Push Slice not working as expected")
-    }
-    
+func createFunnyList() {
     for i := 0; i < 10; i++ {
         if i % 2 == 0 {
-            // for every even number we are going to push a value onto the stack
             ll.Push(i)
         } else {
-            // odd numbers get appended
-            ll.Append(i)
+            ll.Append(i)    
         }
     }
-    
+}
+
+func TestPushPopAppendSlice(t *testing.T) { 
+    createFunnyList() 
     res := []int{8, 6, 4, 2, 0, 1, 3, 5, 7, 9}
     // then we are going to check the sequence from reverse by slicing all the elemnts off to make sure
     // they are the correct values.
@@ -74,34 +85,30 @@ func TestPushPopAppendSlice(t *testing.T) {
     }
 
     ll.Append(11)
-    _, v = ll.Pop()
+    _, v := ll.Pop()
     if v.(int) != 11 {
         t.Errorf("append to an empty list not working as expected")
     }
 
-    b, v = ll.Slice()
+    b, v := ll.Slice()
     if b != false && v != nil {
         t.Errorf("slice on empty list returns non-empty")
     }
 }
 
 // Comparator function for dll
-func comp_fn(p1 interface{}, p2 interface{}) int {
+func comp_fn(p1 LLPayload_t, p2 LLPayload_t) int {
     return p1.(int) - p2.(int)
 }
 
 func TestSort(t *testing.T) {
-    // create a linked list with random elems    
-    ll := AllocateLinkedList()
-    
-    ll.Sort(true, comp_fn)
-    
+    ll.Sort(comp_fn)
     if ll.GetSize() > 0 {
         t.Errorf("sorting on an empty list increased size")
     }
 
     ll.Push(1)
-    ll.Sort(true, comp_fn)
+    ll.Sort(comp_fn)
     if ll.head.payload.(int) != 1 {
         t.Errorf("error sorting one element list failed")
     }
@@ -114,7 +121,7 @@ func TestSort(t *testing.T) {
         ll.Push(rand.Intn(100))
     }
 
-    ll.Sort(true, comp_fn)
+    ll.Sort(comp_fn)
     b, v := ll.Pop()
     count := 0
     if b {
@@ -135,73 +142,52 @@ func TestSort(t *testing.T) {
 }
 
 func TestIterator(t *testing.T) {
-    // Test Iterator creation, and incrementation.
-    ll := AllocateLinkedList()
     for i := 0; i < 4; i++ {
         ll.Append(i)
     }
 
-    ll_iter := ll.Iterator(1)
-    if ll_iter.node != ll.tail {
-        t.Errorf("failed to create iterator starting at tail")
+    ll_iter := ll.Iterator()
+    if ll_iter.node != ll.head {
+        t.Errorf("failed to create iterator starting at head")
     }
 
     count := 0
-    
-    for ll_iter.Next() {
+    for ll_iter.IsValid() {
         count++
-    }
-    
-    if count != 0 {
-        t.Errorf("error tail doesn't have a next")
+        ll_iter.Next()
     }
 
-    for ll_iter.Prev() {
-        count++
+    if count != 4 {
+        t.Errorf("expected %q, actual %q", 4, count)
     }
 
-    if count != 3 {
-        t.Errorf("expected count = %q, actual = %q", 3, count)
-    }
-
+    // rewind the iterator
+    ll_iter.Rewind()
     count = 0
-    
-    for ll_iter.Next() {
+
+    for ll_iter.IsValid() {
+        x := ll_iter.Get() 
+        b, v := ll_iter.Remove()
+        
+        if x != count {
+            t.Errorf("expected %q, got %q", count, x)
+        }
+        
+        if !b || v != count {
+            t.Errorf("expected %q, got %q", count, v)
+        }
         count++
-    }
-    
-    if count != 3 {
-        t.Errorf("expected count = 3, actual = %q", count)
-    }
-
-    if ll_iter.GetPayload() != 3 {
-        t.Errorf("expected 3, got %q", ll_iter.GetPayload())
-    }
-
-    ll_iter = ll.Iterator(0)
-    ll_iter.Next()
-    if ll_iter.GetPayload() != 1 {
-        t.Errorf("expected 2, got %q", ll_iter.GetPayload())
     }
 }
 
-
 func TestIteratorDeleteEmptyList(t *testing.T) {
     ll := AllocateLinkedList()
-    ll_iter := ll.Iterator(0)
-    b, v := ll_iter.Delete()
+    ll_iter := ll.Iterator()
+    b, v := ll_iter.Remove()
     if b || v != nil {
         t.Errorf("Deleting on an empty list shouldn't return non-empty vals")
     }
 }
 
-func TestIteratorDeleteSingleElemList(t *testing.T) {
-    ll := AllocateLinkedList()
-    ll.Append(57)
-    ll_iter := ll.Iterator(1)
-    b, v := ll_iter.Delete()
-    if !b || v != 57 {
-        t.Errorf("expected (true, 57), got (%t, %q)", b, v)
-    }
-}
-*/
+
+
