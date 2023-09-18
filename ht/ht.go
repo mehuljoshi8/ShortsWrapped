@@ -3,23 +3,12 @@ package ht
 import "recipeBot/dll"
 
 // A HashTable is an array of buckets,
-// where each bucket is a linked list. Of HTKeyValue structs.
+// where each bucket is a linked list of HTKeyValue structs.
 type HashTable struct {
     num_buckets     uint64
     num_elements    uint64
-    buckets         []dll.LinkedList;
+    buckets         []*dll.LinkedList;
 }
-
-// The HashTable Iterator
-/*
-type HTIterator struct {
-    ht              *HashTable
-    bucket_idx      uint64
-    bucket_it       *dll.LLIter 
-}
-*/
-
-// int HashKeyToBucketNum(ht *HashTable, HTKey_t key)
 
 type HTKey_t = uint64
 type HTValue_t = interface{}
@@ -28,7 +17,12 @@ type HTKeyValue_t struct {
     value   HTValue_t
 }
 
-// TODO: Implement FVN hash
+// Internal hash function used to map from HTKey_t keys
+// to a bucket number.
+func (ht *HashTable) HashKeyToBucketNum(key HTKey_t) uint64 {
+    return key % ht.num_buckets
+}
+
 // FNV hash implementation.
 //
 // Customers can use this to hash an arbitrary sequence of bytes into
@@ -37,39 +31,49 @@ type HTKeyValue_t struct {
 //     http://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
 //
 // Arguments:
-// - buffer: a pointer to a len-size buffer of unsigned chars.
-// - len: how many bytes are in the buffer.
+// - buffer: of bytes that needs to hashed to a key
 //
 // Returns:
 // - a nicely distributed 64-bit hash value suitable for
 //   use in a HTKeyValue_t.
 // HTKey_t FVNHash64(buffer, int len)
-
-
-// TODO: Implement HashTableAllocate(num_buckets)
-// Allocates and returns a new HashTable.
-// Argugments:
-//  - num_buckets: the number of buckets the hash table should initally
-//      contain; MUST be greater than zero.
-// Returns nil on error, non-null on success.
-func HashTableAllocate(num_buckets uint64) *HashTable {
-    return nil
+func FNVHash64(buffer []byte) HTKey_t {
+    const FNV1_64_INIT uint64 = 0xcbf29ce484222325
+    const FNV_64_PRIME uint64 = 0x100000001b3
+    hval := FNV1_64_INIT
+    // hash each octet of the buffer
+    for _, b := range buffer {
+        // XOR the bottom wtih the current octet.
+        hval ^= HTKey_t(b)
+        // Multiply by the 64 bit FNV magic prime mod 2 ^64.
+        hval *= FNV_64_PRIME
+    }
+    return hval
 }
 
-// TODO: Implement NumElements
-// Figure out the number of elements in the hash table.
-//
-// Arguments:
-//
-// - table:  the table to query
-//
-// Returns:
-//
-// - table size (>=0); note that this is an unsigned 64-bit integer.
-func (ht *HashTable) GetNumElements() int {
-    return 0
+// Allocates and returns a new HashTable with num_buckets
+// number of buckets
+func AllocateHashTable(num_buckets uint64) *HashTable {
+    var ht *HashTable = new(HashTable)
+    ht.num_buckets = num_buckets
+    ht.num_elements = 0
+    ht.buckets = make([]*dll.LinkedList, num_buckets)
+    for i := 0; i < int(num_buckets); i++ {
+        ht.buckets[i] = dll.AllocateLinkedList()
+    }
+    return ht
 }
 
+// Grows the hashtable (increases the number of buckets) if
+// its load factor has become to high.
+// TODO: Complete the implementation of resize
+func (ht *HashTable) Resize() {
+}
+
+// Returns the number of elements in the hash table.
+func (ht *HashTable) GetNumElements() uint64 {
+    return ht.num_elements
+}
 
 // TODO: Implement Insert.
 // Inserts a (key,value) pair into the HashTable.

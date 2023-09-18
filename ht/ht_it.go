@@ -8,3 +8,6 @@ type HTIterator struct {
     bucket_idx      uint64
     bucket_it       *dll.LLIter
 }
+
+
+// and the functions with it

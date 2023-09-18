@@ -10,7 +10,7 @@ type LLIter struct {
 // Usage: ll.Iterator()
 // Returns:
 //  - a newly-allocated iterator, which may be invalid
-//      or "past the end" if the list can't be iterated through (empty).
+//      or "past the end" if the list can't be iterated through (empty)
 func (ll *LinkedList) Iterator() *LLIter {
     ll_iter := new(LLIter)
     ll_iter.ll = ll
