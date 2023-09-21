@@ -49,13 +49,34 @@ func (htIter *HTIterator) IsValid() bool {
 // Returns true if we successfully advanced the iterator.
 // False if we can't advance it (i.e. it's past the end)
 func (htIter *HTIterator) Next() bool {
+    if !htIter.IsValid() {
+        // the iterator is invalid.
+        return false
+    }
+    
+    // we can successfully advance to the next element
+    if htIter.bucket_it.Next() {
+        return true
+    }
+
+    // otherwise the chain is past the end
+    // so we look for a new chain
+    for i := htIter.bucket_idx + 1; i < int64(htIter.ht.num_buckets); i++ {
+        if htIter.ht.buckets[i].GetSize() > 0 {
+            htIter.bucket_idx = i
+            htIter.bucket_it = htIter.ht.buckets[i].Iterator()
+            // if we found one we return true
+            return true
+        }
+    }
+    // otherwise we return false i.e there are no more valid elems
     return false
 }
 
 // Returns a copy of what the iteartor is currently pointing to 
-// or false, nil if the iterator is "past the end"
-func (htIter *HTIterator) Get() (bool, *HTKeyValue_t) {
-    return false, nil
+// or nil if the iterator is "past the end"
+func (htIter *HTIterator) Get() *HTKeyValue_t {
+    return nil
 }
 
 // Returns a copy of (key, value) that the iterator is currently pointing
@@ -63,6 +84,6 @@ func (htIter *HTIterator) Get() (bool, *HTKeyValue_t) {
 // to the next element.
 // Returns false if the remove operation is on an empty table
 // and true if the deletion was successful
-func (htIter *HTIterator) Remove() (bool, *HTKeyValue_t) {
-    return false, nil
+func (htIter *HTIterator) Remove() *HTKeyValue_t {
+    return nil
 }

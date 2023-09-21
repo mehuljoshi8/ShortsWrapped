@@ -25,6 +25,12 @@ func TestAllocateEmptyHashTableIterator(t *testing.T) {
     if htIter.ht != ht || htIter.bucket_idx != -1 || htIter.bucket_it != nil {
         t.Errorf("did not create ht.Iter as expected (htIterators on empty ht)")
     }
+
+    if htIter.IsValid() {
+        t.Errorf("no elements in ht; iterator must be invalid")
+    }
+
+
 }
 
 
