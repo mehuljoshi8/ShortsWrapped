@@ -15,6 +15,16 @@ func TestAllocateHashTable(t *testing.T) {
     if len(ht.buckets) != 10 {
         t.Errorf("did not create 10 buckets for buckets field in hashtable")
     }
+
+}
+
+func TestAllocateEmptyHashTableIterator(t *testing.T) {
+    ht := AllocateHashTable(10)
+    htIter := ht.Iterator()
+
+    if htIter.ht != ht || htIter.bucket_idx != -1 || htIter.bucket_it != nil {
+        t.Errorf("did not create ht.Iter as expected (htIterators on empty ht)")
+    }
 }
 
 

@@ -10,8 +10,10 @@ type HashTable struct {
     buckets         []*dll.LinkedList;
 }
 
+// type aliases for the HashTable
 type HTKey_t = uint64
 type HTValue_t = interface{}
+// The KeyValue struct we are going to use.
 type HTKeyValue_t struct {
     key     HTKey_t
     value   HTValue_t
@@ -19,7 +21,7 @@ type HTKeyValue_t struct {
 
 // Internal hash function used to map from HTKey_t keys
 // to a bucket number.
-func (ht *HashTable) HashKeyToBucketNum(key HTKey_t) uint64 {
+func (ht *HashTable) hashKeyToBucketNum(key HTKey_t) uint64 {
     return key % ht.num_buckets
 }
 
@@ -36,7 +38,6 @@ func (ht *HashTable) HashKeyToBucketNum(key HTKey_t) uint64 {
 // Returns:
 // - a nicely distributed 64-bit hash value suitable for
 //   use in a HTKeyValue_t.
-// HTKey_t FVNHash64(buffer, int len)
 func FNVHash64(buffer []byte) HTKey_t {
     const FNV1_64_INIT uint64 = 0xcbf29ce484222325
     const FNV_64_PRIME uint64 = 0x100000001b3
@@ -67,7 +68,15 @@ func AllocateHashTable(num_buckets uint64) *HashTable {
 // Grows the hashtable (increases the number of buckets) if
 // its load factor has become to high.
 // TODO: Complete the implementation of resize
-func (ht *HashTable) Resize() {
+func (ht *HashTable) resize() {
+    if ht.num_elements < 3 * ht.num_buckets {
+        // no need to resize
+        return
+    }
+
+    // newht := AllocateHashTable(ht.num_buckets * 3)
+
+    // implement ht iterator to complete the rest of the func.
 }
 
 // Returns the number of elements in the hash table.
@@ -76,68 +85,36 @@ func (ht *HashTable) GetNumElements() uint64 {
 }
 
 // TODO: Implement Insert.
-// Inserts a (key,value) pair into the HashTable.
-//
-// Arguments:
-// - table: the HashTable to insert into.
-// - newkeyvalue: the HTKeyValue_t to insert into the table.
-// - oldkeyval: if the key in newkeyvalue is already present
-//   in the HashTable, that old (key,value) is replaced with
-//   newkeyvalue.  In that case, the old (key,value) is returned via
-//   this return parameter to the caller.  It's up to the caller
-//   to free any allocated memory associated with oldkeyvalue->value.
-//
-// Returns:
-//  - false: if the newkeyvalue was inserted and there was no
-//    existing (key,value) with that key.
-//  - true: if the newkeyvalue was inserted and an old (key,value)
-//    with the same key was replaced and returned through
-//    the oldkeyval return parameter.  In this case, the caller assumes
-//    ownership of oldkeyvalue.
-func (ht *HashTable) Insert(newkv HTKeyValue_t) (bool, *HTKeyValue_t) {
-    return false, nil
+// Inserts a (key,value) pair into the HashTable (denoted newkv)
+// and if the key is already present in the hashtable with a
+// different associated value then we return that old HTKeyValue_t
+// to the user. if it did not exist then we return nil for the return value.
+func (ht *HashTable) Insert(newkv HTKeyValue_t) *HTKeyValue_t {
+    // resize if we need to resize
+    //ht.resize()
+    //bucketIdx := ht.hashKeyToBucketNum(newkv.key)
+    // chain is the linked list that we are going to insert
+    // newkv into
+    //chain := ht.buckets[bucketIdx] 
+    //keyValue := new(HTKeyValue_t)
+    //keyValue.key = newkv.key
+    //keyValue.value = value
+    // implement find optional remove...
+    return nil
 }
 
 
 // TODO: Implement Find
 // Looks up a key in the HashTable, and if it is present, returns the
-// (key,value) associated with it.
-//
-// Arguments:
-// - table: the HashTable to look in.
-// - key: the key to look up.
-// - keyvalue: if the key is present, a copy of the (key,value) is
-//   returned to the caller via this return parameter.  Note that the
-//   (key,value) is left in the HashTable, so it is not safe for the
-//   caller to free keyvalue->value.
-//
-// Returns:
-//  - false: if the key wasn't found in the HashTable.
-//  - true: if the key was found, and therefore the associated (key,value)
-//    was returned to the caller via that keyvalue return parameter.
-func (ht *HashTable) Find(key HTKey_t) (bool, *HTKeyValue_t) {
-    return false, nil
+// (key,value) associated with it otherwise returns nil
+func (ht *HashTable) Find(key HTKey_t) *HTKeyValue_t {
+    return nil
 }
 
 // TODO: Implement Remove
 // Removes a (key,value) from the HashTable and returns it to the
-// caller.
-//
-// Arguments:
-// - table: the HashTable to look in.
-// - key: the key to look up.
-// - keyvalue: if the key is present, a copy of (key,value) is returned
-//   to the caller via this return parameter and the (key,value) is
-//   removed from the HashTable.  Note that the caller is responsible
-//   for managing the memory associated with keyvalue->value from
-//   this point on.
-//
-// Returns:
-//  - false: if the key wasn't found in the HashTable.
-//  - true: if the key was found, and therefore (a) the associated
-//    (key,value) was returned to the caller via that keyvalue return
-//    parameter, and (b) that (key,value) was removed from the
-//    HashTable.
-func (ht *HashTable) Remove(key HTKey_t) (bool, *HTKeyValue_t) {
-    return false, nil
+// caller. If the key is not present in the HashTable we return nil.
+func (ht *HashTable) Remove(key HTKey_t) *HTKeyValue_t {
+    return nil
 }
+
