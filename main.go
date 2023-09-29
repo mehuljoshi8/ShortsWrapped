@@ -3,12 +3,9 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
 	"github.com/twilio/twilio-go/twiml"
-	"io"
 	"net/http"
-	"net/url"
 	"recipeBot/basey"
     "strings"
     "unicode"
@@ -16,7 +13,7 @@ import (
 )
 
 var db *sql.DB
-
+/*
 const instaReelStarter = "https://www.instagram.com/reel/"
 
 // to select instareel caption
@@ -93,7 +90,7 @@ func scrapeRecipe(reelId string) string {
 
 	return recipeContent
 }
-
+*/
 
 // ============== Building a full-text search engine ==============
 // we are going to be using an inverted index.... :)
@@ -182,8 +179,7 @@ func routeInput(input string, userNumber string) string {
 	}
 
 	fmt.Println("input = " + input)
-	// working on search feature
-	links, err := basey.GetLinksForUser(db, userid)
+    links, err := basey.GetLinksForUser(db, userid)
 	if err != nil {
 		return "error"
 	}
