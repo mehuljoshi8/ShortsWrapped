@@ -3,78 +3,49 @@ package basey
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"os"
+
+	_ "github.com/lib/pq"
 )
 
-const (
-	host   = "localhost"
-	port   = 5432
-	user   = "postgres"
-	dbname = "recipes"
-)
-
-var password = os.Getenv("PSQL_PW")
-
-/*
-CREATE TABLE USERS (
-
-	id SERIAL PRIMARY KEY,
-	number varchar(12) UNIQUE NON NULL
-
-);
-*/
-type User struct {
-	id     uint64
-	number string
-}
-
-/*
-CREATE TABLE LINKS (
-
-	id SERIAL PRIMARY KEY,
-	hyperlink varchar NON NULL,
-	user_id INTEGER REFERENCES users (id)
-
-);
-*/
-type Link struct {
-	Id            uint64
-	UserId        uint64
-	ReelIdentifer string
-}
-
+// Opens a new connection to the database
 func OpenDatabase() *sql.DB {
-	psqlconn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	host := os.Getenv("PSQL_HOST")
+	port := os.Getenv("PSQL_PORT")
+	user := os.Getenv("PSQL_USER")
+	dbname := os.Getenv("RBOT_DBNAME")
+	password := os.Getenv("PSQL_PW")
+	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlconn)
 	checkError(err)
 	fmt.Println("Connected Successfully to basey :)")
 	return db
 }
 
-// inserts numbers into db
+// Inserts a new user associated with their phone number (number) into db
 func InsertUser(db *sql.DB, number string) {
 	insertSQL := `INSERT INTO "users"("number") values($1)`
 	_, e := db.Exec(insertSQL, number)
 	checkError(e)
 }
 
-// insert links into the db
+// Inserts a Link associated with a user_id and a reel identifer into the db
 func InsertLink(db *sql.DB, userId int, link string) {
 	insertSQL := `INSERT INTO "links"("user_id", "hyperlink") values($1, $2)`
 	_, e := db.Exec(insertSQL, userId, link)
 	checkError(e)
 }
 
+// Checks if there is an error and panics
 func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
 }
 
-// Returns the id for a number in the users database
+// Given a phone number we look up the id of that number in the db and return
+// the id. If that number doesn't exist we return -1.
 func LookupUserId(db *sql.DB, s string) int {
-	fmt.Println(s)
 	var id int
 	err := db.QueryRow("SELECT id FROM USERS WHERE number like $1", s).Scan(&id)
 	if err != nil {
@@ -84,16 +55,15 @@ func LookupUserId(db *sql.DB, s string) int {
 		}
 		panic(err)
 	}
-	fmt.Print("id = ")
-	fmt.Println(id)
 	return id
 }
 
+// Returns the links for a given user with user.id.
 func GetLinksForUser(db *sql.DB, user_id int) ([]Link, error) {
 	var links []Link
 	rows, err := db.Query("SELECT * FROM LINKS WHERE user_id=$1", user_id)
 	if err != nil {
-		return nil, fmt.Errorf("GetLinksForUser (%v)", user_id, err)
+		return nil, fmt.Errorf("GetLinksForUser (%v)", user_id)
 	}
 
 	defer rows.Close()
