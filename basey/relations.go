@@ -28,21 +28,23 @@ CREATE TABLE LINKS (
 );
 */
 type Link struct {
-	Id            uint64
-	UserId        uint64
-	ReelIdentifer string
+	Id        uint64
+	UserId    uint64
+	Identifer string
 }
 
 /*
 CREATE TABLE RECIPES (
 
-	identifer character(11) PRIMARY KEY,
+	id SERIAL PRIMARY KEY
+	identifer character(11) UNIQUE,
 	title	character varying
 	recipe	character varying
 
 );
 */
 type Recipe struct {
+	Id         uint64
 	Identifier string
 	Title      string
 	Body       string

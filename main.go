@@ -94,7 +94,6 @@ func routeInput(input string, userNumber string) string {
 		basey.InsertLink(db, userid, getReelIdentifer(input))
 		return "inserted reel identifer"
 	}
-
 	// fmt.Println("input = " + input)
 	// links, err := basey.GetLinksForUser(db, userid)
 	// if err != nil {

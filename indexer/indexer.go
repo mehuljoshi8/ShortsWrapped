@@ -1,5 +1,11 @@
 package indexer
 
+// TODO: Figure out how to move index to on disk file
+// this will speed up the overall compute power.
+// Maybe following CSE 333's schemmatic might help
+// I may need to build a couple of modules in side this module to do such
+// but that is ok imo
+
 /*
 func tokenize(text string) []string {
 	return strings.FieldsFunc(text, func(r rune) bool {

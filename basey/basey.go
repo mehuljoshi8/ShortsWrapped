@@ -69,7 +69,7 @@ func GetLinksForUser(db *sql.DB, user_id int) ([]Link, error) {
 	defer rows.Close()
 	for rows.Next() {
 		var link Link
-		err := rows.Scan(&link.Id, &link.ReelIdentifer, &link.UserId)
+		err := rows.Scan(&link.Id, &link.Identifer, &link.UserId)
 		if err != nil {
 			return links, err
 		}
