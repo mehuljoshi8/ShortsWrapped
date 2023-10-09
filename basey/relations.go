@@ -36,10 +36,10 @@ type Link struct {
 /*
 CREATE TABLE RECIPES (
 
-	id SERIAL PRIMARY KEY
-	identifer character(11) UNIQUE,
-	title	character varying
-	recipe	character varying
+	id SERIAL PRIMARY KEY,
+	identifer character(11) NOT NULL UNIQUE,
+	title	character varying,
+	body	character varying
 
 );
 */
