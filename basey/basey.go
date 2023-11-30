@@ -30,6 +30,8 @@ func InsertUser(db *sql.DB, number string) {
 }
 
 // Inserts a Link associated with a user_id and a reel identifer into the db
+// TODO: Update insert link s.t. if a link that if we dont this link in the recipes
+// table then we update the recipes schematic.
 func InsertLink(db *sql.DB, userId int, link string) {
 	insertSQL := `INSERT INTO "links"("user_id", "hyperlink") values($1, $2)`
 	_, e := db.Exec(insertSQL, userId, link)
