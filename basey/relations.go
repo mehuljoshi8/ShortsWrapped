@@ -6,35 +6,7 @@
 package basey
 
 /*
-CREATE TABLE USERS (
-
-	id SERIAL PRIMARY KEY,
-	number varchar(12) UNIQUE NON NULL
-
-);
-*/
-type User struct {
-	id     uint64
-	number string
-}
-
-/*
-CREATE TABLE LINKS (
-
-	id SERIAL PRIMARY KEY,
-	hyperlink varchar NON NULL,
-	user_id INTEGER REFERENCES users (id)
-
-);
-*/
-type Link struct {
-	Id        uint64
-	UserId    uint64
-	Identifer string
-}
-
-/*
-CREATE TABLE RECIPES (
+CREATE TABLE Document (
 
 	id SERIAL PRIMARY KEY,
 	identifer character(11) NOT NULL UNIQUE,
@@ -43,7 +15,7 @@ CREATE TABLE RECIPES (
 
 );
 */
-type Recipe struct {
+type Document struct {
 	Id         uint64
 	Identifier string
 	Title      string
