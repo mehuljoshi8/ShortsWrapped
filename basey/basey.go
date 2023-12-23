@@ -11,8 +11,8 @@ const (
 	host     = "localhost"
 	port     = "5432"
 	user     = "mehuljoshi"
-	password = "46AGMDJS"
-	dbname   = "recipes"
+	password = "xxxxxxxxxx"
+	dbname   = "documents"
 )
 
 // Checks if there is an error and panics
@@ -33,6 +33,10 @@ func OpenDatabase() *sql.DB {
 
 func InsertDocument(db *sql.DB, doc *Document) bool {
 	return false
+}
+
+func GetDocumentById() {
+
 }
 
 // // Inserts a new user associated with their phone number (number) into db

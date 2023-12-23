@@ -1,174 +1,165 @@
 package main
 
-import (
-	"database/sql"
-	"fmt"
-	"net/http"
-	"recipeBot/basey"
-	"strings"
-	"unicode"
+// var db *sql.DB
 
-	"github.com/gin-gonic/gin"
-	snowballeng "github.com/kljensen/snowball/english"
-	"github.com/twilio/twilio-go/twiml"
-)
+// // ============== Building a full-text search engine ==============
+// // we are going to be using an inverted index.... :)
+// func tokenize(text string) []string {
+// 	return strings.FieldsFunc(text, func(r rune) bool {
+// 		return !unicode.IsLetter(r) && !unicode.IsNumber(r)
+// 	})
+// }
 
-var db *sql.DB
+// func lowercaseFilter(tokens []string) []string {
+// 	r := make([]string, len(tokens))
+// 	for i, token := range tokens {
+// 		r[i] = strings.ToLower(token)
+// 	}
+// 	return r
+// }
 
-// ============== Building a full-text search engine ==============
-// we are going to be using an inverted index.... :)
-func tokenize(text string) []string {
-	return strings.FieldsFunc(text, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsNumber(r)
-	})
-}
+// func stopwordFilter(tokens []string) []string {
+// 	var stopWords = map[string]struct{}{
+// 		"a": {}, "and": {}, "be": {}, "have": {}, "i": {},
+// 		"in": {}, "of": {}, "that": {}, "the": {}, "to": {},
+// 	}
 
-func lowercaseFilter(tokens []string) []string {
-	r := make([]string, len(tokens))
-	for i, token := range tokens {
-		r[i] = strings.ToLower(token)
-	}
-	return r
-}
+// 	r := make([]string, 0, len(tokens))
+// 	for _, token := range tokens {
+// 		if _, ok := stopWords[token]; !ok {
+// 			r = append(r, token)
+// 		}
+// 	}
+// 	return r
+// }
 
-func stopwordFilter(tokens []string) []string {
-	var stopWords = map[string]struct{}{
-		"a": {}, "and": {}, "be": {}, "have": {}, "i": {},
-		"in": {}, "of": {}, "that": {}, "the": {}, "to": {},
-	}
+// func stemmerFilter(tokens []string) []string {
+// 	r := make([]string, len(tokens))
+// 	for i, token := range tokens {
+// 		r[i] = snowballeng.Stem(token, false)
+// 	}
+// 	return r
+// }
 
-	r := make([]string, 0, len(tokens))
-	for _, token := range tokens {
-		if _, ok := stopWords[token]; !ok {
-			r = append(r, token)
-		}
-	}
-	return r
-}
+// func analyze(text string) []string {
+// 	tokens := tokenize(text)
+// 	tokens = lowercaseFilter(tokens)
+// 	tokens = stopwordFilter(tokens)
+// 	tokens = stemmerFilter(tokens)
+// 	return tokens
+// }
 
-func stemmerFilter(tokens []string) []string {
-	r := make([]string, len(tokens))
-	for i, token := range tokens {
-		r[i] = snowballeng.Stem(token, false)
-	}
-	return r
-}
+// func intersection(a []int, b []int) []int {
+// 	maxLen := len(a)
+// 	if len(b) > maxLen {
+// 		maxLen = len(b)
+// 	}
+// 	r := make([]int, 0, maxLen)
+// 	var i, j int
+// 	for i < len(a) && j < len(b) {
+// 		if a[i] < b[j] {
+// 			i++
+// 		} else if a[i] > b[j] {
+// 			j++
+// 		} else {
+// 			r = append(r, a[i])
+// 			i++
+// 			j++
+// 		}
+// 	}
+// 	return r
+// }
 
-func analyze(text string) []string {
-	tokens := tokenize(text)
-	tokens = lowercaseFilter(tokens)
-	tokens = stopwordFilter(tokens)
-	tokens = stemmerFilter(tokens)
-	return tokens
-}
+// // =============== End of Search Engine ========================
 
-func intersection(a []int, b []int) []int {
-	maxLen := len(a)
-	if len(b) > maxLen {
-		maxLen = len(b)
-	}
-	r := make([]int, 0, maxLen)
-	var i, j int
-	for i < len(a) && j < len(b) {
-		if a[i] < b[j] {
-			i++
-		} else if a[i] > b[j] {
-			j++
-		} else {
-			r = append(r, a[i])
-			i++
-			j++
-		}
-	}
-	return r
-}
+// // returns a string result that is outputted to the user
+// // based on an interaction by the input.
+// func routeInput(input string, userNumber string) string {
+// 	userid := getUserId(userNumber)
 
-// =============== End of Search Engine ========================
+// 	if isInstaReel(input) {
+// 		basey.InsertLink(db, userid, getReelIdentifer(input))
+// 		return "inserted reel identifer"
+// 	}
+// 	// fmt.Println("input = " + input)
+// 	// links, err := basey.GetLinksForUser(db, userid)
+// 	// if err != nil {
+// 	// 	return "error"
+// 	// }
 
-// returns a string result that is outputted to the user
-// based on an interaction by the input.
-func routeInput(input string, userNumber string) string {
-	userid := getUserId(userNumber)
+// 	// // TODO: move recipes to it's own table.
+// 	// recipes := make([]string, len(links))
+// 	// for i, link := range links {
+// 	// 	recipes[i] = scrapeRecipe(link.ReelIdentifer)
+// 	// }
 
-	if isInstaReel(input) {
-		basey.InsertLink(db, userid, getReelIdentifer(input))
-		return "inserted reel identifer"
-	}
-	// fmt.Println("input = " + input)
-	// links, err := basey.GetLinksForUser(db, userid)
-	// if err != nil {
-	// 	return "error"
-	// }
+// 	// var index map[string][]int = make(map[string][]int)
+// 	// // build our index here
+// 	// for i, r := range recipes {
+// 	// 	for _, token := range analyze(r) {
+// 	// 		ids := index[token]
+// 	// 		if ids != nil && ids[len(ids)-1] == i {
+// 	// 			continue
+// 	// 		}
+// 	// 		index[token] = append(ids, i)
+// 	// 	}
+// 	// }
 
-	// // TODO: move recipes to it's own table.
-	// recipes := make([]string, len(links))
-	// for i, link := range links {
-	// 	recipes[i] = scrapeRecipe(link.ReelIdentifer)
-	// }
+// 	// var r []int
+// 	// for _, token := range analyze(input) {
+// 	// 	if ids, ok := index[token]; ok {
+// 	// 		if r == nil {
+// 	// 			r = ids
+// 	// 		} else {
+// 	// 			r = intersection(r, ids)
+// 	// 		}
+// 	// 	}
+// 	// }
 
-	// var index map[string][]int = make(map[string][]int)
-	// // build our index here
-	// for i, r := range recipes {
-	// 	for _, token := range analyze(r) {
-	// 		ids := index[token]
-	// 		if ids != nil && ids[len(ids)-1] == i {
-	// 			continue
-	// 		}
-	// 		index[token] = append(ids, i)
-	// 	}
-	// }
+// 	// fmt.Println(r)
+// 	// // for now i don't care lets just build the search algo
+// 	// for _, j := range r {
+// 	// 	fmt.Println(recipes[j])
+// 	// 	fmt.Println("================================================")
+// 	// }
 
-	// var r []int
-	// for _, token := range analyze(input) {
-	// 	if ids, ok := index[token]; ok {
-	// 		if r == nil {
-	// 			r = ids
-	// 		} else {
-	// 			r = intersection(r, ids)
-	// 		}
-	// 	}
-	// }
+// 	return "working on search"
+// }
 
-	// fmt.Println(r)
-	// // for now i don't care lets just build the search algo
-	// for _, j := range r {
-	// 	fmt.Println(recipes[j])
-	// 	fmt.Println("================================================")
-	// }
+// // Handles the SMS input for the gin sever.
+// func smsHandler(context *gin.Context) {
+// 	requestParams := getRequestParameters(context)
+// 	if requestParams == nil {
+// 		return
+// 	}
 
-	return "working on search"
-}
+// 	res := routeInput(
+// 		requestParams["Body"][0],
+// 		requestParams["From"][0])
 
-// Handles the SMS input for the gin sever.
-func smsHandler(context *gin.Context) {
-	requestParams := getRequestParameters(context)
-	if requestParams == nil {
-		return
-	}
+// 	fmt.Println(res)
 
-	res := routeInput(
-		requestParams["Body"][0],
-		requestParams["From"][0])
+// 	message := &twiml.MessagingMessage{
+// 		Body: res,
+// 	}
 
-	fmt.Println(res)
+// 	twimlResult, err := twiml.Messages([]twiml.Element{message})
+// 	if err != nil {
+// 		context.String(http.StatusInternalServerError, err.Error())
+// 	} else {
+// 		context.Header("Content-Type", "text/xml")
+// 		context.String(http.StatusOK, twimlResult)
+// 	}
+// }
 
-	message := &twiml.MessagingMessage{
-		Body: res,
-	}
-
-	twimlResult, err := twiml.Messages([]twiml.Element{message})
-	if err != nil {
-		context.String(http.StatusInternalServerError, err.Error())
-	} else {
-		context.Header("Content-Type", "text/xml")
-		context.String(http.StatusOK, twimlResult)
-	}
-}
+// func main() {
+// 	db = basey.OpenDatabase()
+// 	defer db.Close()
+// 	router := gin.Default()
+// 	router.POST("/sms", smsHandler)
+// 	router.Run(":4040")
+// }
 
 func main() {
-	db = basey.OpenDatabase()
-	defer db.Close()
-	router := gin.Default()
-	router.POST("/sms", smsHandler)
-	router.Run(":4040")
+
 }

@@ -4,7 +4,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"recipeBot/basey"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/gin-gonic/gin"
@@ -87,15 +86,15 @@ func scrapeRecipe(reelId string) string {
 	return recipeContent
 }
 
-// Looks up the userId for a number. If that number
-// is not inserted in the database we insert it and then
-// return the id for that newly inserted value.
-func getUserId(number string) int {
-	userid := basey.LookupUserId(db, number)
-	if userid == -1 {
-		basey.InsertUser(db, number)
-		userid = basey.LookupUserId(db, number)
-	}
+// // Looks up the userId for a number. If that number
+// // is not inserted in the database we insert it and then
+// // return the id for that newly inserted value.
+// func getUserId(number string) int {
+// 	userid := basey.LookupUserId(db, number)
+// 	if userid == -1 {
+// 		basey.InsertUser(db, number)
+// 		userid = basey.LookupUserId(db, number)
+// 	}
 
-	return userid
-}
+// 	return userid
+// }
