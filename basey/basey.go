@@ -3,65 +3,57 @@ package basey
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
+// Wrapper struct to not expose all the functionality of the sql.DB to clients of basey
 type Basey struct {
 	db *sql.DB
 }
 
-// Make these env variables
-const (
-	host     = "localhost"
-	port     = "5432"
-	user     = "mehuljoshi"
-	password = "**********"
-	dbname   = "documents"
-)
-
 // Opens a new connection to the database
 func OpenDatabase() *Basey {
-	psqlconn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, password, dbname)
+	godotenv.Load(".env")
+	host := os.Getenv("PSQL_HOST")
+	port := os.Getenv("PSQL_PORT")
+	user := os.Getenv("PSQL_USER")
+	password := os.Getenv("PSQL_PSWD")
+	dbname := os.Getenv("PSQL_DBNAME")
+
+	psqlconn := fmt.Sprintf("host=%s port=%v user=%s password=%s dbname=%s sslmode=disable",
+		host, port, user, password, dbname)
 	db, err := sql.Open("postgres", psqlconn)
 	if err != nil {
 		return nil
 	}
-
-	fmt.Println("Connected Successfully to basey :)")
 	res := new(Basey)
 	res.db = db
 	return res
 }
 
-func (b *Basey) InsertDocument(db *sql.DB, doc *Document) bool {
+// Inserts a document into the database
+func (b *Basey) InsertDocument(doc *Document) bool {
 	insertSQL := `INSERT INTO documents("identifer", "title", "body") values($1, $2, $3)`
-	_, e := db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
-	if e != nil {
-		return false
-	}
-
-	return true
+	_, err := b.db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
+	return err == nil
 }
 
-/*
-// // Given a phone number we look up the id of that number in the db and return
-// // the id. If that number doesn't exist we return -1.
-// func LookupUserId(db *sql.DB, s string) int {
-// 	var id int
-// 	err := db.QueryRow("SELECT id FROM USERS WHERE number like $1", s).Scan(&id)
-// 	if err != nil {
-// 		if err == sql.ErrNoRows {
-// 			fmt.Println("NO ROWS FOUND")
-// 			return -1
-// 		}
-// 		panic(err)
-// 	}
-// 	return id
-// }
-*/
+// Closes the connection to the database
+func (b *Basey) Close() {
+	b.db.Close()
+}
 
-func GetDocumentById(doc_id int) *Document {
-	// sql_statement := `SELECT * FROM documents WHERE id=$1`
-	return nil
+// Returns a document associated by the doc_id if it exists in the database
+func (b *Basey) GetDocumentById(doc_id uint64) *Document {
+	sql_statement := `SELECT * FROM documents WHERE id=$1`
+	var doc *Document = new(Document)
+	doc.Id = doc_id
+	err := b.db.QueryRow(sql_statement, doc_id).Scan(&doc.Id, &doc.Identifier, &doc.Title, &doc.Body)
+	if err != nil {
+		return nil
+	}
+	return doc
 }
