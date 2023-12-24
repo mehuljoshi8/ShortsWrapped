@@ -1,6 +1,9 @@
+// Author: Mehul Joshi
+// File: utils.go
 package main
 
 import (
+	"errors"
 	"io"
 	"net/http"
 	"net/url"
@@ -59,19 +62,18 @@ func getRequestParameters(context *gin.Context) url.Values {
 	return requestParams
 }
 
-// TODO: fix the error cases to not just return error and actually return the error.
 // The scapeRecipe function takes in a reelId and attempts to scrape the content
 // from the reel and returns the content through a string. If we can't scrape
 // the content for some reason we return an error and an empty string.
-func scrapeRecipe(reelId string) string {
+func scrapeRecipe(reelId string) (error, string) {
 	res, err := http.Get(instaReelStarter + reelId + "/")
 	if err != nil {
-		return "error"
+		return errors.New("Invalid link got no data back"), ""
 	}
 
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return "error"
+		return errors.New("Status Code for the request was not 200 :("), ""
 	}
 
 	doc, _ := goquery.NewDocumentFromReader(res.Body)
@@ -83,18 +85,5 @@ func scrapeRecipe(reelId string) string {
 		}
 	})
 
-	return recipeContent
+	return nil, recipeContent
 }
-
-// // Looks up the userId for a number. If that number
-// // is not inserted in the database we insert it and then
-// // return the id for that newly inserted value.
-// func getUserId(number string) int {
-// 	userid := basey.LookupUserId(db, number)
-// 	if userid == -1 {
-// 		basey.InsertUser(db, number)
-// 		userid = basey.LookupUserId(db, number)
-// 	}
-
-// 	return userid
-// }
