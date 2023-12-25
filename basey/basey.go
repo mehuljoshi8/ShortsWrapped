@@ -34,11 +34,20 @@ func OpenDatabase() *Basey {
 	return res
 }
 
+// TODO: Update method to return the id of the last inserted value
 // Inserts a document into the database
-func (b *Basey) InsertDocument(doc *Document) bool {
+func (b *Basey) InsertDocument(doc *Document) (bool, int64) {
 	insertSQL := `INSERT INTO documents("identifer", "title", "body") values($1, $2, $3)`
-	_, err := b.db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
-	return err == nil
+	r, err := b.db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
+	if err != nil {
+		return false, -1
+	}
+
+	id, err := r.LastInsertId()
+	if err != nil {
+		return false, -1
+	}
+	return true, id
 }
 
 // Closes the connection to the database

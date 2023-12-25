@@ -32,7 +32,7 @@ func TestInsert(t *testing.T) {
 	doc.Identifier = "AMOLIAMOLI12"
 	doc.Title = "DjungleSkog song"
 	doc.Body = "amoli is a skog\nshe is a djungleskog\ndjungle djungle djungle skog skog skog"
-	if !b.InsertDocument(doc) {
+	if done, _ := b.InsertDocument(doc); done {
 		t.Errorf("Insert failed!")
 	}
 	b.Close()
