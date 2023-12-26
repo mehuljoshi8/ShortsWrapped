@@ -1,7 +1,6 @@
 package indexer
 
 import (
-	"fmt"
 	"recipeBot/basey"
 	"strings"
 	"unicode"
@@ -15,14 +14,14 @@ type Document basey.Document
 // The indexer is what most of the code in this file is concerend about.
 type Indexer struct {
 	doc_set map[uint64]struct{}
-	index   map[string]map[uint64][]int
+	index   map[string]map[uint64][]uint64
 }
 
 // Returns a new instance of an Indexer
 func NewIndexer() *Indexer {
 	i := new(Indexer)
 	i.doc_set = make(map[uint64]struct{})
-	i.index = make(map[string]map[uint64][]int)
+	i.index = make(map[string]map[uint64][]uint64)
 	return i
 }
 
@@ -36,37 +35,34 @@ func (i *Indexer) Index(doc *Document) bool {
 
 	i.doc_set[doc.Id] = struct{}{}
 
-	// var token string
-	// var startPos uint64
-	for _, c := range doc.Body {
-		fmt.Print(string(c))
-	}
-
-	// tokens := tokenize(doc.Body)
-	// tokens = filter_map(tokens)
-
-	return true
-}
-
-// Tokenize a string into an array of strings
-func tokenize(text string) []string {
-	return strings.FieldsFunc(text, func(r rune) bool {
-		return !unicode.IsLetter(r) && !unicode.IsNumber(r)
-	})
-}
-
-func filter_map(tokens []string) []string {
 	var stopWords = map[string]struct{}{
 		"a": {}, "and": {}, "be": {}, "have": {}, "i": {},
 		"in": {}, "of": {}, "that": {}, "the": {}, "to": {},
 	}
-	r := make([]string, 0, len(tokens))
-	for _, token := range tokens {
-		if _, ok := stopWords[token]; !ok {
-			r = append(r, snowballeng.Stem(strings.ToLower(token), false))
+
+	var token string
+	var token_builder strings.Builder
+	var startPos uint64 = 0
+	for j, c := range doc.Body {
+		if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
+			token = token_builder.String()
+			if len(token) > 0 {
+				token = strings.ToLower(token)
+				if _, ok := stopWords[token]; !ok {
+					token = snowballeng.Stem(token, false)
+					if len(i.index[token]) == 0 {
+						i.index[token] = make(map[uint64][]uint64)
+					}
+					i.index[token][doc.Id] = append(i.index[token][doc.Id], startPos)
+				}
+			}
+			startPos = uint64(j) + 1
+			token_builder = strings.Builder{}
+		} else {
+			token_builder.WriteRune(c)
 		}
 	}
-	return r
+	return true
 }
 
 // The single input to process a query; returns a list of doc_ids sorted
