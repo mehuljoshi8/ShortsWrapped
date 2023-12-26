@@ -19,5 +19,9 @@ func TestIndexer(t *testing.T) {
 	doc2.Title = "Sriracha Ingredients"
 	doc2.Body = "Chilli, Water, Sugar, Distilled Vinegar, Garlic, Salt, Thickener: Modified tapicao starch. Xanthan Gum"
 	i.Index(doc2)
+}
 
+func TestQueryProcessor(t *testing.T) {
+	var index *Indexer = NewIndexer()
+	index.ProcessQuery("how to make pasta")
 }
