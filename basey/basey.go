@@ -66,3 +66,16 @@ func (b *Basey) GetDocumentById(doc_id uint64) *Document {
 	}
 	return doc
 }
+
+// Returns a document associated with the Identifer. If a document with that Identifer doesn't
+// exist we return nil otherwise we return the document.
+func (b *Basey) GetDocumentByIdentifer(identifer string) *Document {
+	sql_statement := `SELECT * FROM documents WHERE identifer=$1`
+	var doc *Document = new(Document)
+	doc.Identifier = identifer
+	err := b.db.QueryRow(sql_statement, identifer).Scan(&doc.Id, &doc.Identifier, &doc.Title, &doc.Body)
+	if err != nil {
+		return nil
+	}
+	return doc
+}
