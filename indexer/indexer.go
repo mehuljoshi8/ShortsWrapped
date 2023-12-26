@@ -5,6 +5,8 @@ import (
 	"recipeBot/basey"
 	"strings"
 	"unicode"
+
+	snowballeng "github.com/kljensen/snowball/english"
 )
 
 // Type alias for basey.Document becuase that struct is used heavily through this API
@@ -33,8 +35,15 @@ func (i *Indexer) Index(doc *Document) bool {
 	}
 
 	i.doc_set[doc.Id] = struct{}{}
-	tokens := tokenize(doc.Body)
-	fmt.Println(tokens)
+
+	// var token string
+	// var startPos uint64
+	for _, c := range doc.Body {
+		fmt.Print(string(c))
+	}
+
+	// tokens := tokenize(doc.Body)
+	// tokens = filter_map(tokens)
 
 	return true
 }
@@ -46,8 +55,22 @@ func tokenize(text string) []string {
 	})
 }
 
+func filter_map(tokens []string) []string {
+	var stopWords = map[string]struct{}{
+		"a": {}, "and": {}, "be": {}, "have": {}, "i": {},
+		"in": {}, "of": {}, "that": {}, "the": {}, "to": {},
+	}
+	r := make([]string, 0, len(tokens))
+	for _, token := range tokens {
+		if _, ok := stopWords[token]; !ok {
+			r = append(r, snowballeng.Stem(strings.ToLower(token), false))
+		}
+	}
+	return r
+}
+
 // The single input to process a query; returns a list of doc_ids sorted
 // based on the query that we are given.
-func ProcessQuery(input string) []uint64 {
+func ProcessQuery(query string) []uint64 {
 	return make([]uint64, 0)
 }
