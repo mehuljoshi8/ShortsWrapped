@@ -1,6 +1,7 @@
 package indexer
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -22,6 +23,13 @@ func TestIndexer(t *testing.T) {
 }
 
 func TestQueryProcessor(t *testing.T) {
-	var index *Indexer = NewIndexer()
-	index.ProcessQuery("how to make pasta")
+	var doc *Document = new(Document)
+	doc.Id = 1
+	doc.Identifier = "OCEAN78-RDum"
+	doc.Title = "Craking the Coding Interview"
+	doc.Body = "The code below offers an inital solution, but it has a bug in it. Can you find it"
+	doc.Body += "\nThe problem with this code occurs in the case where\nSuppose we call commonAncestor(node 3, node 5, node 7)."
+	var i *Indexer = NewIndexer()
+	i.Index(doc)
+	fmt.Println(i.ProcessQuery("code offers a way to solve problems")[0])
 }
