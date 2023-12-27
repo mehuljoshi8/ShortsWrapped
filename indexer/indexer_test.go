@@ -29,7 +29,16 @@ func TestQueryProcessor(t *testing.T) {
 	doc.Title = "Craking the Coding Interview"
 	doc.Body = "The code below offers an inital solution, but it has a bug in it. Can you find it"
 	doc.Body += "\nThe problem with this code occurs in the case where\nSuppose we call commonAncestor(node 3, node 5, node 7)."
+
+	var doc2 *Document = new(Document)
+	doc2.Id = 2
+	doc2.Identifier = "GRISHAM390HJ"
+	doc2.Title = "The Pelican Breif"
+	doc2.Body = "The next day America learns that two of its supreme court justices have been assassinated. Law student solves the problem."
+
+	doc2.Body = "solve                                            B"
 	var i *Indexer = NewIndexer()
 	i.Index(doc)
-	fmt.Println(i.ProcessQuery("code offers a way to solve problems")[0])
+	i.Index(doc2)
+	fmt.Println(i.ProcessQuery("code offers a way to solve problems"))
 }

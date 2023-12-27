@@ -18,12 +18,6 @@ type Indexer struct {
 	index   map[string]map[uint64][]uint64
 }
 
-// Search result structure to store all the search results for a given query.
-type SearchResult struct {
-	docId uint64
-	rank  uint64
-}
-
 // All The Stop Words that we use for the indexer
 var stopWords = map[string]struct{}{
 	"a": {}, "and": {}, "be": {}, "have": {}, "i": {},
@@ -79,7 +73,7 @@ func (i *Indexer) Index(doc *Document) bool {
 				i.appendPos(token, doc.Id, startPos)
 			}
 			startPos = uint64(j) + 1
-			token_builder = strings.Builder{}
+			token_builder.Reset()
 		} else {
 			token_builder.WriteRune(c)
 		}
@@ -94,18 +88,15 @@ func (i *Indexer) Index(doc *Document) bool {
 
 // The single input to process a query; returns a list of doc_ids sorted
 // based on the query that we are given.
+// The rank function of a document is what we have to figure out to make
+// our search engine a good one.
 func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
-	// look things up token by token
-	// what we are trying to do is create a ranking between the documents in the index.
-	// an index struct consits of a doc_set that contains all the documents
-	// which is just a set of ints that represent the doc ids.
 	var results map[uint64]uint64 = make(map[uint64]uint64, 0)
 
 	var token string
 	var token_builder strings.Builder = strings.Builder{}
 	var tokenCount uint64 = 0
 	var startPos uint64 = 0
-
 	for j, c := range query {
 		if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
 			token = transformToken(token_builder.String())
@@ -115,12 +106,9 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 				for doc_id, lst := range i.index[token] {
 					results[doc_id] += uint64(len(lst))
 				}
-
-				fmt.Println(startPos, token)
 			}
 			startPos = uint64(j) + 1
-			token_builder = strings.Builder{}
-
+			token_builder.Reset()
 		} else {
 			token_builder.WriteRune(c)
 		}
@@ -136,6 +124,5 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 		fmt.Println(startPos, token)
 	}
 
-	fmt.Println(results)
 	return results
 }
