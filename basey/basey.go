@@ -38,15 +38,11 @@ func OpenDatabase() *Basey {
 // Inserts a document into the database
 func (b *Basey) InsertDocument(doc *Document) (bool, int64) {
 	insertSQL := `INSERT INTO documents("identifer", "title", "body") values($1, $2, $3)`
-	r, err := b.db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
+	_, err := b.db.Exec(insertSQL, doc.Identifier, doc.Title, doc.Body)
 	if err != nil {
 		return false, -1
 	}
-
-	id, err := r.LastInsertId()
-	if err != nil {
-		return false, -1
-	}
+	id := int64(b.GetDocumentByIdentifer(doc.Identifier).Id)
 	return true, id
 }
 

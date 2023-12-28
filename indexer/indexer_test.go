@@ -2,11 +2,12 @@ package indexer
 
 import (
 	"fmt"
+	"recipeBot/basey"
 	"testing"
 )
 
 func TestIndexer(t *testing.T) {
-	var doc *Document = new(Document)
+	var doc *basey.Document = new(basey.Document)
 	doc.Id = 1
 	doc.Identifier = "OCEAN78-RDum"
 	doc.Title = "Craking the Coding Interview"
@@ -14,7 +15,7 @@ func TestIndexer(t *testing.T) {
 	doc.Body += "\nThe problem with this code occurs in the case where\nSuppose we call commonAncestor(node 3, node 5, node 7)."
 	var i *Indexer = NewIndexer()
 	i.Index(doc)
-	var doc2 *Document = new(Document)
+	var doc2 *basey.Document = new(basey.Document)
 	doc2.Id = 2
 	doc2.Identifier = "CHILLIFIRE12"
 	doc2.Title = "Sriracha Ingredients"
@@ -23,14 +24,14 @@ func TestIndexer(t *testing.T) {
 }
 
 func TestQueryProcessor(t *testing.T) {
-	var doc *Document = new(Document)
+	var doc *basey.Document = new(basey.Document)
 	doc.Id = 1
 	doc.Identifier = "OCEAN78-RDum"
 	doc.Title = "Craking the Coding Interview"
 	doc.Body = "The code below offers an inital solution, but it has a bug in it. Can you find it"
 	doc.Body += "\nThe problem with this code occurs in the case where\nSuppose we call commonAncestor(node 3, node 5, node 7)."
 
-	var doc2 *Document = new(Document)
+	var doc2 *basey.Document = new(basey.Document)
 	doc2.Id = 2
 	doc2.Identifier = "GRISHAM390HJ"
 	doc2.Title = "The Pelican Breif"

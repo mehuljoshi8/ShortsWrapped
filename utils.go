@@ -33,7 +33,7 @@ func isInstaReel(s string) bool {
 // RecipeBot currently only recives reels in the form of
 // instaReelStarter + IDENTIFER + /id=....
 // This function returns the IDENTIFER for the reel.
-func getReelIdentifer(link string) string {
+func getReelIdentifier(link string) string {
 	i := len(link) - 1
 	for link[i] != '/' {
 		i--

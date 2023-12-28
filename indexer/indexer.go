@@ -9,9 +9,6 @@ import (
 	snowballeng "github.com/kljensen/snowball/english"
 )
 
-// Type alias for basey.Document becuase that struct is used heavily through this API
-type Document basey.Document
-
 // The indexer is what most of the code in this file is concerend about.
 type Indexer struct {
 	doc_set map[uint64]struct{}
@@ -56,7 +53,7 @@ func (i *Indexer) appendPos(token string, docId uint64, startPos uint64) {
 // The index function puts the document into the index if
 // the index already contains that document then we don't
 // index it and return false. Otherwise we index it and return true.
-func (i *Indexer) Index(doc *Document) bool {
+func (i *Indexer) Index(doc *basey.Document) bool {
 	if _, found := i.doc_set[doc.Id]; found {
 		return false
 	}
@@ -83,6 +80,8 @@ func (i *Indexer) Index(doc *Document) bool {
 	if len(token) > 0 {
 		i.appendPos(token, doc.Id, startPos)
 	}
+
+	fmt.Println(i.index)
 	return true
 }
 
@@ -101,8 +100,6 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 		if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
 			token = transformToken(token_builder.String())
 			if len(token) > 0 {
-				// if the token is a valid token we just want to for each of the
-				// docs that have that word add the rank to it
 				for doc_id, lst := range i.index[token] {
 					results[doc_id] += uint64(len(lst))
 				}
