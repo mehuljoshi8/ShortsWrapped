@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"recipeBot/basey"
 	"recipeBot/indexer"
@@ -13,8 +12,8 @@ import (
 var db *basey.Basey
 var i *indexer.Indexer
 
-// // returns a string result that is outputted to the user
-// // based on an interaction by the input.
+// returns a string result that is outputted to the user
+// based on an interaction by the input.
 func routeInput(input string, userNumber string) string {
 	if isInstaReel(input) {
 		var doc *basey.Document
@@ -36,14 +35,12 @@ func routeInput(input string, userNumber string) string {
 
 		return "Insert Succeeded."
 	}
-	fmt.Println(i.ProcessQuery(input))
 	return "working on search"
 }
 
 // // Handles the SMS input for the gin sever.
 func smsHandler(context *gin.Context) {
 	requestParams := getRequestParameters(context)
-	fmt.Println("requestParams = ", requestParams)
 	if requestParams == nil {
 		return
 	}
@@ -51,8 +48,6 @@ func smsHandler(context *gin.Context) {
 	res := routeInput(
 		requestParams["Body"][0],
 		requestParams["From"][0])
-
-	fmt.Println(res)
 
 	message := &twiml.MessagingMessage{
 		Body: res,

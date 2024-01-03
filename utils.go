@@ -68,12 +68,12 @@ func getRequestParameters(context *gin.Context) url.Values {
 func scrapeRecipe(reelId string) (error, string) {
 	res, err := http.Get(instaReelStarter + reelId + "/")
 	if err != nil {
-		return errors.New("Invalid link got no data back"), ""
+		return errors.New("invalid link got no data back"), ""
 	}
 
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		return errors.New("Status Code for the request was not 200 :("), ""
+		return errors.New("status code for the request was not 200 :("), ""
 	}
 
 	doc, _ := goquery.NewDocumentFromReader(res.Body)

@@ -1,7 +1,6 @@
 package indexer
 
 import (
-	"fmt"
 	"recipeBot/basey"
 	"strings"
 	"unicode"
@@ -81,7 +80,6 @@ func (i *Indexer) Index(doc *basey.Document) bool {
 		i.appendPos(token, doc.Id, startPos)
 	}
 
-	fmt.Println(i.index)
 	return true
 }
 
@@ -95,8 +93,8 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 	var token string
 	var token_builder strings.Builder = strings.Builder{}
 	var tokenCount uint64 = 0
-	var startPos uint64 = 0
-	for j, c := range query {
+	// var startPos uint64 = 0
+	for _, c := range query {
 		if !unicode.IsLetter(c) && !unicode.IsNumber(c) {
 			token = transformToken(token_builder.String())
 			if len(token) > 0 {
@@ -104,7 +102,7 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 					results[doc_id] += uint64(len(lst))
 				}
 			}
-			startPos = uint64(j) + 1
+			// startPos = uint64(j) + 1
 			token_builder.Reset()
 		} else {
 			token_builder.WriteRune(c)
@@ -118,7 +116,6 @@ func (i *Indexer) ProcessQuery(query string) map[uint64]uint64 {
 		for doc_id, lst := range i.index[token] {
 			results[doc_id] += uint64(len(lst))
 		}
-		fmt.Println(startPos, token)
 	}
 
 	return results
